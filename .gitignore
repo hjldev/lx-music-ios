@@ -1,0 +1,26 @@
+# macOS
+.DS_Store
+
+# Xcode user settings & workspace state
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+*.xccheckout
+*.moved-aside
+
+# Build generated
+build/
+DerivedData/
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# Playgrounds & timeline
+timeline.xctimeline
+playground.xcworkspace
+

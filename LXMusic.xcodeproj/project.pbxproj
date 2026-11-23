@@ -1,0 +1,727 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0209DA4A93D32A1E8D19E561 /* DislikeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93A29532A1ECE2895843D8E7 /* DislikeStore.swift */; };
+		0A8671AE9DD9126FFEF05ADE /* LyricModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7713AABF9B1932E293170902 /* LyricModels.swift */; };
+		0B18E1C76BBD896BEA206553 /* MusicMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B7AE7A6809917C142321CC /* MusicMatcher.swift */; };
+		0D2A6C92F8EE5141FA921160 /* SourcePickerBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8C82AE146371B75CEAB030F /* SourcePickerBar.swift */; };
+		0ED4CC40B79C73352DBB8E75 /* UserApiStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 602CB32915D2B356672422AC /* UserApiStore.swift */; };
+		10F249879B3756335B248075 /* UserApiManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29B0476CB2355A9BCDB3512F /* UserApiManagerView.swift */; };
+		13ACFD086E945EEA47FF42BA /* StatusBarLyricBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEAC558454905901EFC54680 /* StatusBarLyricBar.swift */; };
+		1AD8EDB3D2FC3660D126E4D3 /* KWMusicSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFA4D1EBFD4D36CFA2691475 /* KWMusicSDK.swift */; };
+		1E383E76E0E96C96B7792354 /* LockScreenLyricArtworkRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C4BDD6B6D567074181F602C /* LockScreenLyricArtworkRenderer.swift */; };
+		22385A26A8D4F6659D62220A /* CryptoUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C4CDCB610F81D6AA5F7F1AC /* CryptoUtils.swift */; };
+		26AFCCCB8D360F9307F9F04B /* MiniPlayerBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04A9AA841274DCA81D57519F /* MiniPlayerBar.swift */; };
+		29D46027F6CB5C4AE4051E4B /* FullPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA489ED8502DAA51249955B5 /* FullPlayerView.swift */; };
+		2BCF08CF3A9B1790806BD83B /* UserApiHeaderParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A9550AA3C1918C10DD17A06 /* UserApiHeaderParser.swift */; };
+		2CB135CDEA9BE0741EB16DE7 /* WYMusicSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415CDDFB12873F308072A365 /* WYMusicSDK.swift */; };
+		2DF69D30C8D73D6AC4548DC3 /* FormatUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7CC863AE856BB83BE42D097 /* FormatUtils.swift */; };
+		2DFC05145608755DF2D4F7B4 /* TXQRCDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4E2D21011C06465E86D5F5B /* TXQRCDecoder.swift */; };
+		2F6AD04AA090A2D768088299 /* MGMusicSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5BB3B358EE0F2C30DB4ABD1 /* MGMusicSDK.swift */; };
+		3042FF61E8964D291F6FCFAC /* MusicRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53946FB65326E3377A67B5CC /* MusicRowView.swift */; };
+		30ECE8BE6000BBC308A1B190 /* LiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D7127E704663E613C011FA0 /* LiveActivityManager.swift */; };
+		324A4A555C1694E2CFC193AA /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A875A8A3313298D9A450253B /* SettingsView.swift */; };
+		330B14675D1BC03726923D47 /* KGMusicSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FF4B1565C4EB7462A057474 /* KGMusicSDK.swift */; };
+		362F687D6A34F175720B47C2 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = C3F5704DABFAC56837903221 /* libz.tbd */; };
+		39EC2139E19CEF57417B76DA /* TXMusicSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210B644F24370F426AED54CE /* TXMusicSDK.swift */; };
+		3F20FE9057DBD3EEAE605B88 /* AudioPlayerEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2CC138578E699596424A85A /* AudioPlayerEngine.swift */; };
+		49D49B7995D28954BF627241 /* SongListSquareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A838811FE02C0E8E75A770F2 /* SongListSquareView.swift */; };
+		4E9B300C781B8A863434B9C8 /* UserApiModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42E82DC086A2FB21BD57BBE2 /* UserApiModels.swift */; };
+		4F56039C20D54D5FFA044736 /* HTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7F8D3FC5D988962159D83D8 /* HTTPClient.swift */; };
+		4FD1C7D16C330E88C3A32D8B /* MusicSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C09A2CA86780B33FE05DB998 /* MusicSource.swift */; };
+		5112A0DB13570087842C59E3 /* MGMRCDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94A97B70926F4EC5CFC8AD0E /* MGMRCDecoder.swift */; };
+		697EBDC643121C2833196A32 /* MyListsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C7E528CA24D48F2DC743EE3 /* MyListsView.swift */; };
+		6C9C9406F54E71732CDA5CB3 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8BD40A5195F29C5C97E1372 /* AppSettings.swift */; };
+		6DAF04E327F6CBBEFAA4C4D4 /* UserApiEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF1F5F472FFE5FD64C6F6248 /* UserApiEngine.swift */; };
+		7629C4B8E75CD4D57F35DF2E /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F7AF5309875897C84865D18 /* SearchView.swift */; };
+		777A0BDF0390C3EE58EB5938 /* PlayQueueSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 754296B95A4D1892E91F752F /* PlayQueueSheet.swift */; };
+		7BF0764FEC1F8935C20E6AD4 /* SourceSwitchSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1FBF9683516241DFC80CF5C /* SourceSwitchSheet.swift */; };
+		83E2DCDACAECF7862A9AA131 /* AddToPlaylistSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BEDB05FAC3CE258092EB4FA /* AddToPlaylistSheet.swift */; };
+		8D29FAA896C323A033AF3C1C /* LibraryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FA3C9BA44EA197D32B28502 /* LibraryStore.swift */; };
+		967D239E3177CFB2965F3030 /* PlaylistModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEAE879755192AD8D4ECC467 /* PlaylistModels.swift */; };
+		A43D0CAAB9C5C64033436E27 /* PlayerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F953A81ED2E8ED385C93CFE7 /* PlayerController.swift */; };
+		A76A3073BFDB47702D9DBFA4 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97AFB389DAC220E9A03C06DC /* MainTabView.swift */; };
+		AE4F511BDF5647499EF541FD /* LyricParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EB290EBFB642A80A6E6434C /* LyricParser.swift */; };
+		B014D0D1112AFE52A2276221 /* PlaylistDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1D1D3B3370715509CA1781A /* PlaylistDetailView.swift */; };
+		B08C37AD2C138F78D384947F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1BE0E512F0DADBD54C3042FC /* Assets.xcassets */; };
+		B2BE1BA5ED9BC1806594EE0F /* LXMCBackupCodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9CA0A01DF3EB09FD5F285DB /* LXMCBackupCodec.swift */; };
+		B656564CC6FC52AA0A321BC6 /* LXMusicCoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63000C5D936374799E271687 /* LXMusicCoreTests.swift */; };
+		B678B2E991AC18A1F747A9D2 /* MusicSDKProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = B76B67D7CED4147F628480D2 /* MusicSDKProtocol.swift */; };
+		B8283A877C293DF7DC5D2871 /* SongListDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6F5C28B045DD8E7A08F3E1E /* SongListDetailView.swift */; };
+		BE02A331D28AE5744DD0B4DC /* LeaderboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21EBB1C4468502B78E7BA04F /* LeaderboardView.swift */; };
+		CDAC670E9A04D01F6F39A98B /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33A4B2AC730207341E6D74B1 /* AppEnvironment.swift */; };
+		D15DC0CEB6322113C858B0E9 /* CachedAsyncImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A4B28336C58ADAF054DF50 /* CachedAsyncImage.swift */; };
+		D5B50118F0D4E76B9C1F7EE8 /* PersistenceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F43E2DA47F2101B634851059 /* PersistenceStore.swift */; };
+		D9557EB5279E93A72562DECC /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32B08232BA18AEFA4728448E /* SettingsStore.swift */; };
+		DC1995BE31B6D763A6272E37 /* MusicInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3546E70C41C24B11B12DAD07 /* MusicInfo.swift */; };
+		E60FDF4BBBF4D6F2BD8270EC /* LyricsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 461A5217B53C75406B91A414 /* LyricsView.swift */; };
+		E73A87614B157BFCD0AC93E4 /* LXMusicApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92DAD78AB9FEAD873A0C8D80 /* LXMusicApp.swift */; };
+		F3E61F99D6719E5E18AB00B9 /* DislikeManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E64A9156D112FF7F539E8D8D /* DislikeManagerView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		632A9AEDBEEE7C13FF5A5C99 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8757E4C537AB41D0558B983E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 08903C0C0EA0601E634A1A61;
+			remoteInfo = LXMusic;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		04A9AA841274DCA81D57519F /* MiniPlayerBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MiniPlayerBar.swift; path = LXMusic/Views/Player/MiniPlayerBar.swift; sourceTree = SOURCE_ROOT; };
+		0C7E528CA24D48F2DC743EE3 /* MyListsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MyListsView.swift; path = LXMusic/Views/Library/MyListsView.swift; sourceTree = SOURCE_ROOT; };
+		0D7127E704663E613C011FA0 /* LiveActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LiveActivityManager.swift; path = LXMusic/Core/Player/LiveActivityManager.swift; sourceTree = SOURCE_ROOT; };
+		1BE0E512F0DADBD54C3042FC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = LXMusic/Resources/Assets.xcassets; sourceTree = SOURCE_ROOT; };
+		210B644F24370F426AED54CE /* TXMusicSDK.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TXMusicSDK.swift; path = LXMusic/Core/MusicSDK/TXMusicSDK.swift; sourceTree = SOURCE_ROOT; };
+		215D83200F7BBD3EDA240DA0 /* LXMusic.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LXMusic.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		21EBB1C4468502B78E7BA04F /* LeaderboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LeaderboardView.swift; path = LXMusic/Views/Leaderboard/LeaderboardView.swift; sourceTree = SOURCE_ROOT; };
+		29B0476CB2355A9BCDB3512F /* UserApiManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UserApiManagerView.swift; path = LXMusic/Views/Settings/UserApiManagerView.swift; sourceTree = SOURCE_ROOT; };
+		2C4BDD6B6D567074181F602C /* LockScreenLyricArtworkRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LockScreenLyricArtworkRenderer.swift; path = LXMusic/Core/Player/LockScreenLyricArtworkRenderer.swift; sourceTree = SOURCE_ROOT; };
+		30FE55748BFCC77C46B41CB5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = LXMusic/Resources/Info.plist; sourceTree = SOURCE_ROOT; };
+		32B08232BA18AEFA4728448E /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SettingsStore.swift; path = LXMusic/Stores/SettingsStore.swift; sourceTree = SOURCE_ROOT; };
+		33A4B2AC730207341E6D74B1 /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppEnvironment.swift; path = LXMusic/App/AppEnvironment.swift; sourceTree = SOURCE_ROOT; };
+		3546E70C41C24B11B12DAD07 /* MusicInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MusicInfo.swift; path = LXMusic/Models/MusicInfo.swift; sourceTree = SOURCE_ROOT; };
+		415CDDFB12873F308072A365 /* WYMusicSDK.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WYMusicSDK.swift; path = LXMusic/Core/MusicSDK/WYMusicSDK.swift; sourceTree = SOURCE_ROOT; };
+		42E82DC086A2FB21BD57BBE2 /* UserApiModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UserApiModels.swift; path = LXMusic/Models/UserApiModels.swift; sourceTree = SOURCE_ROOT; };
+		461A5217B53C75406B91A414 /* LyricsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LyricsView.swift; path = LXMusic/Views/Player/LyricsView.swift; sourceTree = SOURCE_ROOT; };
+		4F7AF5309875897C84865D18 /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SearchView.swift; path = LXMusic/Views/Search/SearchView.swift; sourceTree = SOURCE_ROOT; };
+		53946FB65326E3377A67B5CC /* MusicRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MusicRowView.swift; path = LXMusic/Views/Components/MusicRowView.swift; sourceTree = SOURCE_ROOT; };
+		5BEDB05FAC3CE258092EB4FA /* AddToPlaylistSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AddToPlaylistSheet.swift; path = LXMusic/Views/Components/AddToPlaylistSheet.swift; sourceTree = SOURCE_ROOT; };
+		5C4CDCB610F81D6AA5F7F1AC /* CryptoUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CryptoUtils.swift; path = LXMusic/Core/Crypto/CryptoUtils.swift; sourceTree = SOURCE_ROOT; };
+		5C612F9202DD457E3A28DAB5 /* LXMusicTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LXMusicTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		5EB290EBFB642A80A6E6434C /* LyricParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LyricParser.swift; path = LXMusic/Core/Lyric/LyricParser.swift; sourceTree = SOURCE_ROOT; };
+		602CB32915D2B356672422AC /* UserApiStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UserApiStore.swift; path = LXMusic/Stores/UserApiStore.swift; sourceTree = SOURCE_ROOT; };
+		63000C5D936374799E271687 /* LXMusicCoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LXMusicCoreTests.swift; path = LXMusicTests/LXMusicCoreTests.swift; sourceTree = SOURCE_ROOT; };
+		6FA3C9BA44EA197D32B28502 /* LibraryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LibraryStore.swift; path = LXMusic/Stores/LibraryStore.swift; sourceTree = SOURCE_ROOT; };
+		754296B95A4D1892E91F752F /* PlayQueueSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PlayQueueSheet.swift; path = LXMusic/Views/Player/PlayQueueSheet.swift; sourceTree = SOURCE_ROOT; };
+		7713AABF9B1932E293170902 /* LyricModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LyricModels.swift; path = LXMusic/Models/LyricModels.swift; sourceTree = SOURCE_ROOT; };
+		8A9550AA3C1918C10DD17A06 /* UserApiHeaderParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UserApiHeaderParser.swift; path = LXMusic/Core/UserApi/UserApiHeaderParser.swift; sourceTree = SOURCE_ROOT; };
+		92DAD78AB9FEAD873A0C8D80 /* LXMusicApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LXMusicApp.swift; path = LXMusic/App/LXMusicApp.swift; sourceTree = SOURCE_ROOT; };
+		93A29532A1ECE2895843D8E7 /* DislikeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DislikeStore.swift; path = LXMusic/Stores/DislikeStore.swift; sourceTree = SOURCE_ROOT; };
+		94A97B70926F4EC5CFC8AD0E /* MGMRCDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MGMRCDecoder.swift; path = LXMusic/Core/Crypto/MGMRCDecoder.swift; sourceTree = SOURCE_ROOT; };
+		97AFB389DAC220E9A03C06DC /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MainTabView.swift; path = LXMusic/Views/MainTabView.swift; sourceTree = SOURCE_ROOT; };
+		9FF4B1565C4EB7462A057474 /* KGMusicSDK.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = KGMusicSDK.swift; path = LXMusic/Core/MusicSDK/KGMusicSDK.swift; sourceTree = SOURCE_ROOT; };
+		A1A4B28336C58ADAF054DF50 /* CachedAsyncImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CachedAsyncImage.swift; path = LXMusic/Views/Components/CachedAsyncImage.swift; sourceTree = SOURCE_ROOT; };
+		A5B7AE7A6809917C142321CC /* MusicMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MusicMatcher.swift; path = LXMusic/Core/MusicSDK/MusicMatcher.swift; sourceTree = SOURCE_ROOT; };
+		A838811FE02C0E8E75A770F2 /* SongListSquareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SongListSquareView.swift; path = LXMusic/Views/Discover/SongListSquareView.swift; sourceTree = SOURCE_ROOT; };
+		A875A8A3313298D9A450253B /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SettingsView.swift; path = LXMusic/Views/Settings/SettingsView.swift; sourceTree = SOURCE_ROOT; };
+		AEAC558454905901EFC54680 /* StatusBarLyricBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StatusBarLyricBar.swift; path = LXMusic/Views/Components/StatusBarLyricBar.swift; sourceTree = SOURCE_ROOT; };
+		AF1F5F472FFE5FD64C6F6248 /* UserApiEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UserApiEngine.swift; path = LXMusic/Core/UserApi/UserApiEngine.swift; sourceTree = SOURCE_ROOT; };
+		B4E2D21011C06465E86D5F5B /* TXQRCDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TXQRCDecoder.swift; path = LXMusic/Core/Crypto/TXQRCDecoder.swift; sourceTree = SOURCE_ROOT; };
+		B76B67D7CED4147F628480D2 /* MusicSDKProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MusicSDKProtocol.swift; path = LXMusic/Core/MusicSDK/MusicSDKProtocol.swift; sourceTree = SOURCE_ROOT; };
+		B7CC863AE856BB83BE42D097 /* FormatUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FormatUtils.swift; path = LXMusic/Core/Network/FormatUtils.swift; sourceTree = SOURCE_ROOT; };
+		C09A2CA86780B33FE05DB998 /* MusicSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MusicSource.swift; path = LXMusic/Models/MusicSource.swift; sourceTree = SOURCE_ROOT; };
+		C3F5704DABFAC56837903221 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
+		C5BB3B358EE0F2C30DB4ABD1 /* MGMusicSDK.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MGMusicSDK.swift; path = LXMusic/Core/MusicSDK/MGMusicSDK.swift; sourceTree = SOURCE_ROOT; };
+		D1FBF9683516241DFC80CF5C /* SourceSwitchSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SourceSwitchSheet.swift; path = LXMusic/Views/Player/SourceSwitchSheet.swift; sourceTree = SOURCE_ROOT; };
+		D6F5C28B045DD8E7A08F3E1E /* SongListDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SongListDetailView.swift; path = LXMusic/Views/Discover/SongListDetailView.swift; sourceTree = SOURCE_ROOT; };
+		D8BD40A5195F29C5C97E1372 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppSettings.swift; path = LXMusic/Models/AppSettings.swift; sourceTree = SOURCE_ROOT; };
+		D9CA0A01DF3EB09FD5F285DB /* LXMCBackupCodec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LXMCBackupCodec.swift; path = LXMusic/Core/Persistence/LXMCBackupCodec.swift; sourceTree = SOURCE_ROOT; };
+		E64A9156D112FF7F539E8D8D /* DislikeManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DislikeManagerView.swift; path = LXMusic/Views/Library/DislikeManagerView.swift; sourceTree = SOURCE_ROOT; };
+		E7F8D3FC5D988962159D83D8 /* HTTPClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HTTPClient.swift; path = LXMusic/Core/Network/HTTPClient.swift; sourceTree = SOURCE_ROOT; };
+		E8C82AE146371B75CEAB030F /* SourcePickerBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SourcePickerBar.swift; path = LXMusic/Views/Components/SourcePickerBar.swift; sourceTree = SOURCE_ROOT; };
+		EFA4D1EBFD4D36CFA2691475 /* KWMusicSDK.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = KWMusicSDK.swift; path = LXMusic/Core/MusicSDK/KWMusicSDK.swift; sourceTree = SOURCE_ROOT; };
+		F1D1D3B3370715509CA1781A /* PlaylistDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PlaylistDetailView.swift; path = LXMusic/Views/Library/PlaylistDetailView.swift; sourceTree = SOURCE_ROOT; };
+		F2CC138578E699596424A85A /* AudioPlayerEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AudioPlayerEngine.swift; path = LXMusic/Core/Player/AudioPlayerEngine.swift; sourceTree = SOURCE_ROOT; };
+		F43E2DA47F2101B634851059 /* PersistenceStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PersistenceStore.swift; path = LXMusic/Core/Persistence/PersistenceStore.swift; sourceTree = SOURCE_ROOT; };
+		F953A81ED2E8ED385C93CFE7 /* PlayerController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PlayerController.swift; path = LXMusic/Core/Player/PlayerController.swift; sourceTree = SOURCE_ROOT; };
+		FA489ED8502DAA51249955B5 /* FullPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FullPlayerView.swift; path = LXMusic/Views/Player/FullPlayerView.swift; sourceTree = SOURCE_ROOT; };
+		FEAE879755192AD8D4ECC467 /* PlaylistModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PlaylistModels.swift; path = LXMusic/Models/PlaylistModels.swift; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8EEC317DFAF9A1B5C96BA0C4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				362F687D6A34F175720B47C2 /* libz.tbd in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F312CA1861AA7EC912C23F92 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		070B013B2D59527F76D873C9 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				D8BD40A5195F29C5C97E1372 /* AppSettings.swift */,
+				7713AABF9B1932E293170902 /* LyricModels.swift */,
+				3546E70C41C24B11B12DAD07 /* MusicInfo.swift */,
+				C09A2CA86780B33FE05DB998 /* MusicSource.swift */,
+				FEAE879755192AD8D4ECC467 /* PlaylistModels.swift */,
+				42E82DC086A2FB21BD57BBE2 /* UserApiModels.swift */,
+			);
+			name = Models;
+			sourceTree = "<group>";
+		};
+		0BDDE8E09915690B7D11A885 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				A875A8A3313298D9A450253B /* SettingsView.swift */,
+				29B0476CB2355A9BCDB3512F /* UserApiManagerView.swift */,
+			);
+			name = Settings;
+			sourceTree = "<group>";
+		};
+		171D6C198AE40ED4A040BB61 = {
+			isa = PBXGroup;
+			children = (
+				1C6A16663078A54853970C8B /* LXMusic */,
+				9953D1780C200B88E13A31FB /* LXMusicTests */,
+				52308DF7C5083D9D6B58F8F4 /* Frameworks */,
+				27376E0C7D98A85EF39644D5 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		1B09D941C767FF02530B4CC8 /* Search */ = {
+			isa = PBXGroup;
+			children = (
+				4F7AF5309875897C84865D18 /* SearchView.swift */,
+			);
+			name = Search;
+			sourceTree = "<group>";
+		};
+		1C6A16663078A54853970C8B /* LXMusic */ = {
+			isa = PBXGroup;
+			children = (
+				A1CE1C837976AF52FEBFFD36 /* App */,
+				9E62891ECEE92AE4085563C9 /* Core */,
+				070B013B2D59527F76D873C9 /* Models */,
+				752C7588864E6BBD0ABD8179 /* Stores */,
+				BF0556757578EC51E0FED3D8 /* Views */,
+				FC52A2213532689E8F8AA34A /* Resources */,
+			);
+			name = LXMusic;
+			sourceTree = "<group>";
+		};
+		27376E0C7D98A85EF39644D5 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				215D83200F7BBD3EDA240DA0 /* LXMusic.app */,
+				5C612F9202DD457E3A28DAB5 /* LXMusicTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		28CED1BF29AE4EFA462A20F6 /* Library */ = {
+			isa = PBXGroup;
+			children = (
+				E64A9156D112FF7F539E8D8D /* DislikeManagerView.swift */,
+				0C7E528CA24D48F2DC743EE3 /* MyListsView.swift */,
+				F1D1D3B3370715509CA1781A /* PlaylistDetailView.swift */,
+			);
+			name = Library;
+			sourceTree = "<group>";
+		};
+		4995F3A327D48138F3DEBE87 /* Persistence */ = {
+			isa = PBXGroup;
+			children = (
+				D9CA0A01DF3EB09FD5F285DB /* LXMCBackupCodec.swift */,
+				F43E2DA47F2101B634851059 /* PersistenceStore.swift */,
+			);
+			name = Persistence;
+			sourceTree = "<group>";
+		};
+		4F0917326D60F6B158F08835 /* Leaderboard */ = {
+			isa = PBXGroup;
+			children = (
+				21EBB1C4468502B78E7BA04F /* LeaderboardView.swift */,
+			);
+			name = Leaderboard;
+			sourceTree = "<group>";
+		};
+		52308DF7C5083D9D6B58F8F4 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				C3F5704DABFAC56837903221 /* libz.tbd */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		660601E962FDA4FAEC2BBDB7 /* Player */ = {
+			isa = PBXGroup;
+			children = (
+				FA489ED8502DAA51249955B5 /* FullPlayerView.swift */,
+				461A5217B53C75406B91A414 /* LyricsView.swift */,
+				04A9AA841274DCA81D57519F /* MiniPlayerBar.swift */,
+				754296B95A4D1892E91F752F /* PlayQueueSheet.swift */,
+				D1FBF9683516241DFC80CF5C /* SourceSwitchSheet.swift */,
+			);
+			name = Player;
+			sourceTree = "<group>";
+		};
+		6D3C285087B6705071902ABB /* Crypto */ = {
+			isa = PBXGroup;
+			children = (
+				5C4CDCB610F81D6AA5F7F1AC /* CryptoUtils.swift */,
+				94A97B70926F4EC5CFC8AD0E /* MGMRCDecoder.swift */,
+				B4E2D21011C06465E86D5F5B /* TXQRCDecoder.swift */,
+			);
+			name = Crypto;
+			sourceTree = "<group>";
+		};
+		752C7588864E6BBD0ABD8179 /* Stores */ = {
+			isa = PBXGroup;
+			children = (
+				93A29532A1ECE2895843D8E7 /* DislikeStore.swift */,
+				6FA3C9BA44EA197D32B28502 /* LibraryStore.swift */,
+				32B08232BA18AEFA4728448E /* SettingsStore.swift */,
+				602CB32915D2B356672422AC /* UserApiStore.swift */,
+			);
+			name = Stores;
+			sourceTree = "<group>";
+		};
+		772927E1729DD7BB774D3B43 /* MusicSDK */ = {
+			isa = PBXGroup;
+			children = (
+				9FF4B1565C4EB7462A057474 /* KGMusicSDK.swift */,
+				EFA4D1EBFD4D36CFA2691475 /* KWMusicSDK.swift */,
+				C5BB3B358EE0F2C30DB4ABD1 /* MGMusicSDK.swift */,
+				A5B7AE7A6809917C142321CC /* MusicMatcher.swift */,
+				B76B67D7CED4147F628480D2 /* MusicSDKProtocol.swift */,
+				210B644F24370F426AED54CE /* TXMusicSDK.swift */,
+				415CDDFB12873F308072A365 /* WYMusicSDK.swift */,
+			);
+			name = MusicSDK;
+			sourceTree = "<group>";
+		};
+		87CD36647963BF40FA017B8B /* Discover */ = {
+			isa = PBXGroup;
+			children = (
+				D6F5C28B045DD8E7A08F3E1E /* SongListDetailView.swift */,
+				A838811FE02C0E8E75A770F2 /* SongListSquareView.swift */,
+			);
+			name = Discover;
+			sourceTree = "<group>";
+		};
+		95C1852C0EF4FEA0DA5B8765 /* UserApi */ = {
+			isa = PBXGroup;
+			children = (
+				AF1F5F472FFE5FD64C6F6248 /* UserApiEngine.swift */,
+				8A9550AA3C1918C10DD17A06 /* UserApiHeaderParser.swift */,
+			);
+			name = UserApi;
+			sourceTree = "<group>";
+		};
+		9953D1780C200B88E13A31FB /* LXMusicTests */ = {
+			isa = PBXGroup;
+			children = (
+				63000C5D936374799E271687 /* LXMusicCoreTests.swift */,
+			);
+			name = LXMusicTests;
+			sourceTree = "<group>";
+		};
+		9B2B2E45A250A57C94E42AFD /* Lyric */ = {
+			isa = PBXGroup;
+			children = (
+				5EB290EBFB642A80A6E6434C /* LyricParser.swift */,
+			);
+			name = Lyric;
+			sourceTree = "<group>";
+		};
+		9E62891ECEE92AE4085563C9 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				6D3C285087B6705071902ABB /* Crypto */,
+				9B2B2E45A250A57C94E42AFD /* Lyric */,
+				772927E1729DD7BB774D3B43 /* MusicSDK */,
+				F5B3DB7270C5DCBF3A5380DA /* Network */,
+				4995F3A327D48138F3DEBE87 /* Persistence */,
+				BCACA62F0D3A1AF9D6126C5B /* Player */,
+				95C1852C0EF4FEA0DA5B8765 /* UserApi */,
+			);
+			name = Core;
+			sourceTree = "<group>";
+		};
+		A1CE1C837976AF52FEBFFD36 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				33A4B2AC730207341E6D74B1 /* AppEnvironment.swift */,
+				92DAD78AB9FEAD873A0C8D80 /* LXMusicApp.swift */,
+			);
+			name = App;
+			sourceTree = "<group>";
+		};
+		BCACA62F0D3A1AF9D6126C5B /* Player */ = {
+			isa = PBXGroup;
+			children = (
+				F2CC138578E699596424A85A /* AudioPlayerEngine.swift */,
+				0D7127E704663E613C011FA0 /* LiveActivityManager.swift */,
+				2C4BDD6B6D567074181F602C /* LockScreenLyricArtworkRenderer.swift */,
+				F953A81ED2E8ED385C93CFE7 /* PlayerController.swift */,
+			);
+			name = Player;
+			sourceTree = "<group>";
+		};
+		BF0556757578EC51E0FED3D8 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				D834D38EBEE05EA9113445B3 /* Components */,
+				87CD36647963BF40FA017B8B /* Discover */,
+				4F0917326D60F6B158F08835 /* Leaderboard */,
+				28CED1BF29AE4EFA462A20F6 /* Library */,
+				97AFB389DAC220E9A03C06DC /* MainTabView.swift */,
+				660601E962FDA4FAEC2BBDB7 /* Player */,
+				1B09D941C767FF02530B4CC8 /* Search */,
+				0BDDE8E09915690B7D11A885 /* Settings */,
+			);
+			name = Views;
+			sourceTree = "<group>";
+		};
+		D834D38EBEE05EA9113445B3 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				5BEDB05FAC3CE258092EB4FA /* AddToPlaylistSheet.swift */,
+				A1A4B28336C58ADAF054DF50 /* CachedAsyncImage.swift */,
+				53946FB65326E3377A67B5CC /* MusicRowView.swift */,
+				E8C82AE146371B75CEAB030F /* SourcePickerBar.swift */,
+				AEAC558454905901EFC54680 /* StatusBarLyricBar.swift */,
+			);
+			name = Components;
+			sourceTree = "<group>";
+		};
+		F5B3DB7270C5DCBF3A5380DA /* Network */ = {
+			isa = PBXGroup;
+			children = (
+				B7CC863AE856BB83BE42D097 /* FormatUtils.swift */,
+				E7F8D3FC5D988962159D83D8 /* HTTPClient.swift */,
+			);
+			name = Network;
+			sourceTree = "<group>";
+		};
+		FC52A2213532689E8F8AA34A /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				1BE0E512F0DADBD54C3042FC /* Assets.xcassets */,
+				30FE55748BFCC77C46B41CB5 /* Info.plist */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		08903C0C0EA0601E634A1A61 /* LXMusic */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 553C36434D2A6B733DDF222A /* Build configuration list for PBXNativeTarget "LXMusic" */;
+			buildPhases = (
+				48BBDFBF225AA972B80D03A2 /* Sources */,
+				8EEC317DFAF9A1B5C96BA0C4 /* Frameworks */,
+				988504961AAB65A09C54539D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = LXMusic;
+			productName = LXMusic;
+			productReference = 215D83200F7BBD3EDA240DA0 /* LXMusic.app */;
+			productType = "com.apple.product-type.application";
+		};
+		B151013DE4E6DD29C0F871AC /* LXMusicTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3806F19BDFB234BD1CCE7662 /* Build configuration list for PBXNativeTarget "LXMusicTests" */;
+			buildPhases = (
+				FDC958EBB13B9982D6FB96C9 /* Sources */,
+				F312CA1861AA7EC912C23F92 /* Frameworks */,
+				B25C0000592CA0E5A2C94490 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E1E8F14C92CE45C604A96256 /* PBXTargetDependency */,
+			);
+			name = LXMusicTests;
+			productName = LXMusicTests;
+			productReference = 5C612F9202DD457E3A28DAB5 /* LXMusicTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		8757E4C537AB41D0558B983E /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					B151013DE4E6DD29C0F871AC = {
+						TestTargetID = 08903C0C0EA0601E634A1A61;
+					};
+				};
+			};
+			buildConfigurationList = 1B9DAA1375A387B9D21031EF /* Build configuration list for PBXProject "LXMusic" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = zh_CN;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				zh_CN,
+				en,
+				Base,
+			);
+			mainGroup = 171D6C198AE40ED4A040BB61;
+			productRefGroup = 27376E0C7D98A85EF39644D5 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				08903C0C0EA0601E634A1A61 /* LXMusic */,
+				B151013DE4E6DD29C0F871AC /* LXMusicTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		988504961AAB65A09C54539D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B08C37AD2C138F78D384947F /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B25C0000592CA0E5A2C94490 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		48BBDFBF225AA972B80D03A2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CDAC670E9A04D01F6F39A98B /* AppEnvironment.swift in Sources */,
+				E73A87614B157BFCD0AC93E4 /* LXMusicApp.swift in Sources */,
+				22385A26A8D4F6659D62220A /* CryptoUtils.swift in Sources */,
+				5112A0DB13570087842C59E3 /* MGMRCDecoder.swift in Sources */,
+				2DFC05145608755DF2D4F7B4 /* TXQRCDecoder.swift in Sources */,
+				AE4F511BDF5647499EF541FD /* LyricParser.swift in Sources */,
+				330B14675D1BC03726923D47 /* KGMusicSDK.swift in Sources */,
+				1AD8EDB3D2FC3660D126E4D3 /* KWMusicSDK.swift in Sources */,
+				2F6AD04AA090A2D768088299 /* MGMusicSDK.swift in Sources */,
+				0B18E1C76BBD896BEA206553 /* MusicMatcher.swift in Sources */,
+				B678B2E991AC18A1F747A9D2 /* MusicSDKProtocol.swift in Sources */,
+				39EC2139E19CEF57417B76DA /* TXMusicSDK.swift in Sources */,
+				2CB135CDEA9BE0741EB16DE7 /* WYMusicSDK.swift in Sources */,
+				2DF69D30C8D73D6AC4548DC3 /* FormatUtils.swift in Sources */,
+				4F56039C20D54D5FFA044736 /* HTTPClient.swift in Sources */,
+				B2BE1BA5ED9BC1806594EE0F /* LXMCBackupCodec.swift in Sources */,
+				D5B50118F0D4E76B9C1F7EE8 /* PersistenceStore.swift in Sources */,
+				3F20FE9057DBD3EEAE605B88 /* AudioPlayerEngine.swift in Sources */,
+				30ECE8BE6000BBC308A1B190 /* LiveActivityManager.swift in Sources */,
+				1E383E76E0E96C96B7792354 /* LockScreenLyricArtworkRenderer.swift in Sources */,
+				A43D0CAAB9C5C64033436E27 /* PlayerController.swift in Sources */,
+				6DAF04E327F6CBBEFAA4C4D4 /* UserApiEngine.swift in Sources */,
+				2BCF08CF3A9B1790806BD83B /* UserApiHeaderParser.swift in Sources */,
+				6C9C9406F54E71732CDA5CB3 /* AppSettings.swift in Sources */,
+				0A8671AE9DD9126FFEF05ADE /* LyricModels.swift in Sources */,
+				DC1995BE31B6D763A6272E37 /* MusicInfo.swift in Sources */,
+				4FD1C7D16C330E88C3A32D8B /* MusicSource.swift in Sources */,
+				967D239E3177CFB2965F3030 /* PlaylistModels.swift in Sources */,
+				4E9B300C781B8A863434B9C8 /* UserApiModels.swift in Sources */,
+				0209DA4A93D32A1E8D19E561 /* DislikeStore.swift in Sources */,
+				8D29FAA896C323A033AF3C1C /* LibraryStore.swift in Sources */,
+				D9557EB5279E93A72562DECC /* SettingsStore.swift in Sources */,
+				0ED4CC40B79C73352DBB8E75 /* UserApiStore.swift in Sources */,
+				83E2DCDACAECF7862A9AA131 /* AddToPlaylistSheet.swift in Sources */,
+				D15DC0CEB6322113C858B0E9 /* CachedAsyncImage.swift in Sources */,
+				3042FF61E8964D291F6FCFAC /* MusicRowView.swift in Sources */,
+				0D2A6C92F8EE5141FA921160 /* SourcePickerBar.swift in Sources */,
+				13ACFD086E945EEA47FF42BA /* StatusBarLyricBar.swift in Sources */,
+				B8283A877C293DF7DC5D2871 /* SongListDetailView.swift in Sources */,
+				49D49B7995D28954BF627241 /* SongListSquareView.swift in Sources */,
+				BE02A331D28AE5744DD0B4DC /* LeaderboardView.swift in Sources */,
+				F3E61F99D6719E5E18AB00B9 /* DislikeManagerView.swift in Sources */,
+				697EBDC643121C2833196A32 /* MyListsView.swift in Sources */,
+				B014D0D1112AFE52A2276221 /* PlaylistDetailView.swift in Sources */,
+				A76A3073BFDB47702D9DBFA4 /* MainTabView.swift in Sources */,
+				29D46027F6CB5C4AE4051E4B /* FullPlayerView.swift in Sources */,
+				E60FDF4BBBF4D6F2BD8270EC /* LyricsView.swift in Sources */,
+				26AFCCCB8D360F9307F9F04B /* MiniPlayerBar.swift in Sources */,
+				777A0BDF0390C3EE58EB5938 /* PlayQueueSheet.swift in Sources */,
+				7BF0764FEC1F8935C20E6AD4 /* SourceSwitchSheet.swift in Sources */,
+				7629C4B8E75CD4D57F35DF2E /* SearchView.swift in Sources */,
+				324A4A555C1694E2CFC193AA /* SettingsView.swift in Sources */,
+				10F249879B3756335B248075 /* UserApiManagerView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FDC958EBB13B9982D6FB96C9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B656564CC6FC52AA0A321BC6 /* LXMusicCoreTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		E1E8F14C92CE45C604A96256 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 08903C0C0EA0601E634A1A61 /* LXMusic */;
+			targetProxy = 632A9AEDBEEE7C13FF5A5C99 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		3E21606D2AAC452B6105ED5F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = ER5F2PWFS7;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = LXMusic/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 2.12.6;
+				PRODUCT_BUNDLE_IDENTIFIER = cn.toside.lxmusic.ios;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+			};
+			name = Debug;
+		};
+		97EA59459CE2CD2C081B49D2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		ADBF2A7E925260D30804AD46 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		B8213AA6FB679F1E69EB9ABC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 2.12.6;
+				PRODUCT_BUNDLE_IDENTIFIER = cn.toside.lxmusic.ios.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LXMusic.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/LXMusic";
+			};
+			name = Debug;
+		};
+		C4B274D2786A5AFC25B6D908 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = ER5F2PWFS7;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = LXMusic/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 2.12.6;
+				PRODUCT_BUNDLE_IDENTIFIER = cn.toside.lxmusic.ios;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+			};
+			name = Release;
+		};
+		D1DD849096AC1A3B49273A6B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 2.12.6;
+				PRODUCT_BUNDLE_IDENTIFIER = cn.toside.lxmusic.ios.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LXMusic.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/LXMusic";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1B9DAA1375A387B9D21031EF /* Build configuration list for PBXProject "LXMusic" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ADBF2A7E925260D30804AD46 /* Debug */,
+				97EA59459CE2CD2C081B49D2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3806F19BDFB234BD1CCE7662 /* Build configuration list for PBXNativeTarget "LXMusicTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B8213AA6FB679F1E69EB9ABC /* Debug */,
+				D1DD849096AC1A3B49273A6B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		553C36434D2A6B733DDF222A /* Build configuration list for PBXNativeTarget "LXMusic" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3E21606D2AAC452B6105ED5F /* Debug */,
+				C4B274D2786A5AFC25B6D908 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 8757E4C537AB41D0558B983E /* Project object */;
+}
