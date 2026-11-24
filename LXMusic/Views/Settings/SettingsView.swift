@@ -59,7 +59,6 @@ struct SettingsView: View {
                         }
                     }
 
-                    Toggle("播放失败自动换源", isOn: $bindableSettings.settings.allowAutoSwitchSource)
                     Toggle("出错时自动跳过下一首", isOn: $bindableSettings.settings.autoSkipOnError)
                     Toggle("切歌单时清空随机历史", isOn: $bindableSettings.settings.isAutoCleanPlayedList)
                     Toggle("定时关闭前播完当前曲目", isOn: $bindableSettings.settings.waitPlayEndStop)

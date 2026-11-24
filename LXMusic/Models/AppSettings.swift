@@ -61,7 +61,6 @@ struct AppSettings: Codable, Equatable, Sendable {
     var playMode: PlayMode = .listLoop
     var playbackRate: Double = 1.0
     var autoSkipOnError: Bool = true
-    var allowAutoSwitchSource: Bool = true
     var isAutoCleanPlayedList: Bool = false
     var waitPlayEndStop: Bool = true
 
@@ -78,9 +77,4 @@ struct AppSettings: Codable, Equatable, Sendable {
 
     // Custom Source
     var activeUserApiId: String? = nil
-
-    // UI Preferences
-    var defaultSearchScope: SearchSourceScope = .all
-    var defaultDiscoverSource: MusicSource = .kw
-    var defaultLeaderboardSource: MusicSource = .kw
 }

@@ -102,14 +102,6 @@ struct MainTabView: View {
                 AddToPlaylistSheet(tracks: tracks)
             }
         }
-        .sheet(isPresented: Binding(
-            get: { env.trackPendingSourceSwitch != nil },
-            set: { if !$0 { env.trackPendingSourceSwitch = nil } }
-        )) {
-            if let track = env.trackPendingSourceSwitch {
-                SourceSwitchSheet(targetTrack: track, accentColor: accentColor)
-            }
-        }
         .alert(
             bindableUserApi.pendingUpdateAlert?.scriptName ?? "自定义音源更新提示",
             isPresented: Binding(

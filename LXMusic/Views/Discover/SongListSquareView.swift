@@ -1,13 +1,11 @@
 import SwiftUI
 
-/// Online SongList Square (`歌单广场`) supporting all 5 music sources, sort modes, tag categories,
-/// infinite pagination, and opening any external playlist by URL/ID/Kugou code.
+/// Online SongList Square (`歌单广场`) powered by Kuwo Music, supporting sort modes, tag categories,
+/// infinite pagination, and opening external playlists by URL or ID.
 struct SongListSquareView: View {
     let accentColor: Color
-    @Environment(SettingsStore.self) private var settingsStore
     @Environment(PlayerController.self) private var player
 
-    @State private var selectedSource: MusicSource = .kw
     @State private var selectedSortId: String = "new"
     @State private var selectedTag: SongListTagItem? = nil
 
@@ -28,31 +26,31 @@ struct SongListSquareView: View {
         GridItem(.flexible(), spacing: 14),
     ]
 
+    private var sdk: KWMusicSDK {
+        MusicSDKRegistry.shared.kw
+    }
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                SourcePickerBar(selected: $selectedSource, accentColor: accentColor)
-
                 // Sort & Tag Filter Row
                 HStack(spacing: 8) {
-                    if let sdk = MusicSDKRegistry.shared.sdk(for: selectedSource) {
-                        ForEach(sdk.songListSortOptions) { opt in
-                            let isSelected = (opt.id == selectedSortId)
-                            Button {
-                                selectedSortId = opt.id
-                                Task { await loadPage(reset: true) }
-                            } label: {
-                                Text(opt.name)
-                                    .font(.caption.weight(isSelected ? .semibold : .regular))
-                                    .foregroundStyle(isSelected ? accentColor : .secondary)
-                                    .padding(.horizontal, 10)
-                                    .padding(.vertical, 5)
-                                    .background(
-                                        Capsule().fill(isSelected ? accentColor.opacity(0.14) : Color.secondary.opacity(0.1))
-                                    )
-                            }
-                            .buttonStyle(.plain)
+                    ForEach(sdk.songListSortOptions) { opt in
+                        let isSelected = (opt.id == selectedSortId)
+                        Button {
+                            selectedSortId = opt.id
+                            Task { await loadPage(reset: true) }
+                        } label: {
+                            Text(opt.name)
+                                .font(.caption.weight(isSelected ? .semibold : .regular))
+                                .foregroundStyle(isSelected ? accentColor : .secondary)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 5)
+                                .background(
+                                    Capsule().fill(isSelected ? accentColor.opacity(0.14) : Color.secondary.opacity(0.1))
+                                )
                         }
+                        .buttonStyle(.plain)
                     }
 
                     Spacer()
@@ -74,7 +72,7 @@ struct SongListSquareView: View {
                     .buttonStyle(.plain)
                 }
                 .padding(.horizontal, 16)
-                .padding(.vertical, 6)
+                .padding(.vertical, 8)
 
                 Divider()
 
@@ -101,8 +99,8 @@ struct SongListSquareView: View {
             .sheet(isPresented: $showTagPicker) {
                 tagPickerSheet
             }
-            .alert("打开在线歌单链接 / ID", isPresented: $showOpenLinkAlert) {
-                TextField("粘贴 \(selectedSource.displayName) 歌单链接、ID 或酷狗码", text: $linkInput)
+            .alert("打开酷我歌单链接 / ID", isPresented: $showOpenLinkAlert) {
+                TextField("粘贴酷我音乐歌单链接或 ID", text: $linkInput)
                 Button("取消", role: .cancel) {}
                 Button("打开") {
                     let trimmed = linkInput.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -114,26 +112,15 @@ struct SongListSquareView: View {
                         img: nil,
                         playCount: nil,
                         desc: nil,
-                        source: selectedSource
+                        source: .kw
                     )
                 }
             } message: {
-                Text("当前音源：\(selectedSource.displayName)")
-            }
-            .onChange(of: selectedSource) { _, newSource in
-                settingsStore.settings.defaultDiscoverSource = newSource
-                selectedTag = nil
-                tagsResult = nil
-                selectedSortId = MusicSDKRegistry.shared.sdk(for: newSource)?.songListSortOptions.first?.id ?? "hot"
-                Task {
-                    await loadTags()
-                    await loadPage(reset: true)
-                }
+                Text("支持酷我音乐及波点歌单链接或 ID")
             }
             .task {
                 if items.isEmpty {
-                    selectedSource = settingsStore.settings.defaultDiscoverSource
-                    selectedSortId = MusicSDKRegistry.shared.sdk(for: selectedSource)?.songListSortOptions.first?.id ?? "new"
+                    selectedSortId = sdk.songListSortOptions.first?.id ?? "new"
                     await loadTags()
                     await loadPage(reset: true)
                 }
@@ -304,12 +291,10 @@ struct SongListSquareView: View {
     // MARK: - Data Loading
 
     private func loadTags() async {
-        guard let sdk = MusicSDKRegistry.shared.sdk(for: selectedSource) else { return }
         tagsResult = try? await sdk.getSongListTags()
     }
 
     private func loadPage(reset: Bool) async {
-        guard let sdk = MusicSDKRegistry.shared.sdk(for: selectedSource) else { return }
         if reset {
             page = 1
             hasMore = true

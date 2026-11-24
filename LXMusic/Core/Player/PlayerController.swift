@@ -40,7 +40,6 @@ final class PlayerController {
     private(set) var statusText: String = ""
     private(set) var errorMessage: String?
     private(set) var activeQuality: AudioQuality = .k128
-    private(set) var switchedSourceTrack: MusicInfo?
 
     private(set) var currentTime: Double = 0
     private(set) var duration: Double = 0
@@ -197,7 +196,6 @@ final class PlayerController {
         currentLyricInfo = nil
         parsedLyric = .empty
         activeLyricLineIndex = nil
-        switchedSourceTrack = nil
     }
 
     func seek(to seconds: Double) {
@@ -260,25 +258,12 @@ final class PlayerController {
         return libraryStore.tracks(in: listId)
     }
 
-    // MARK: - Dislike & Manual Source Switch
+    // MARK: - Dislike
 
     func dislikeCurrentAndSkip() {
         guard let track = currentTrack else { return }
         dislikeStore.addDislike(musicInfo: track)
         playNext(isAutoToggle: true)
-    }
-
-    /// Manually switches the currently playing track to an alternative source candidate.
-    func switchToAlternativeTrack(_ altTrack: MusicInfo) {
-        guard let base = currentTrack else { return }
-        var updated = base
-        updated.meta.toggleMusicInfo = altTrack
-        currentTrack = updated
-        switchedSourceTrack = altTrack
-        startPlaying(
-            QueueItem(listId: currentListId ?? BuiltInListID.temp, musicInfo: updated, isTempPlay: isTempPlay),
-            isRefresh: true
-        )
     }
 
     // MARK: - Next / Prev State Machine (`core/player/action.ts` & `utils.ts`)
@@ -580,7 +565,6 @@ final class PlayerController {
         currentLyricInfo = nil
         parsedLyric = .empty
         activeLyricLineIndex = nil
-        switchedSourceTrack = item.musicInfo.meta.toggleMusicInfo
 
         audioEngine.pause()
         syncNowPlayingInfo(force: true)
@@ -594,11 +578,10 @@ final class PlayerController {
             async let lyricTask: Void = self.loadLyrics(for: track, sessionToken: token)
 
             do {
-                let resolved = try await self.resolvePlayableURL(for: track, isRefresh: isRefresh)
+                let resolved = try await self.resolveDirectURL(for: track, isRefresh: isRefresh)
                 guard self.playSessionToken == token, !Task.isCancelled else { return }
 
                 self.activeQuality = resolved.quality
-                self.switchedSourceTrack = (resolved.resolvedTrack.id != track.id) ? resolved.resolvedTrack : track.meta.toggleMusicInfo
                 self.statusText = "正在缓冲音频..."
 
                 guard let url = URL(string: resolved.url) else {
@@ -620,82 +603,26 @@ final class PlayerController {
     private struct ResolvedPlayURL {
         let url: String
         let quality: AudioQuality
-        let resolvedTrack: MusicInfo
-    }
-
-    private func resolvePlayableURL(for track: MusicInfo, isRefresh: Bool) async throws -> ResolvedPlayURL {
-        // 1. Try user-pinned `toggleMusicInfo` first if set
-        if let pinned = track.meta.toggleMusicInfo {
-            if let pinnedResult = try? await resolveDirectURL(for: pinned, isRefresh: isRefresh) {
-                return pinnedResult
-            }
-        }
-
-        // 2. Try primary track
-        do {
-            let direct = try await resolveDirectURL(for: track, isRefresh: isRefresh)
-            return direct
-        } catch {
-            // Do not auto-switch on rate-limit (`服务器繁忙`) or when disabled
-            if case HTTPClientError.tooManyRequests = error { throw error }
-            if case MusicSDKError.noActiveCustomSource = error { throw error }
-            guard settingsStore.settings.allowAutoSwitchSource else { throw error }
-
-            statusText = "正在自动换源..."
-            let candidates = await MusicMatcher.findOtherSourceMatches(for: track)
-            var triedSources: Set<MusicSource> = [track.source]
-
-            for alt in candidates {
-                guard !triedSources.contains(alt.source) else { continue }
-                triedSources.insert(alt.source)
-                guard userApiStore.supportsSource(alt.source) else { continue }
-
-                let supported = userApiStore.supportedQualities(for: alt.source)
-                let q = MusicMatcher.resolvePlayQuality(
-                    preferred: settingsStore.settings.playQuality,
-                    musicInfo: alt,
-                    supportedBySource: supported
-                )
-                guard alt.hasQuality(q) || q == .k128 else { continue }
-
-                statusText = "尝试换源: \(alt.source.displayName)..."
-                if let cached = PersistenceStore.shared.getCachedMusicUrl(musicId: alt.id, quality: q), !isRefresh {
-                    PersistenceStore.shared.saveCachedMusicUrl(musicId: track.id, quality: q, url: cached)
-                    return ResolvedPlayURL(url: cached, quality: q, resolvedTrack: alt)
-                }
-
-                do {
-                    let url = try await userApiStore.requestMusicUrl(source: alt.source, quality: q, musicInfo: alt)
-                    PersistenceStore.shared.saveCachedMusicUrl(musicId: alt.id, quality: q, url: url)
-                    PersistenceStore.shared.saveCachedMusicUrl(musicId: track.id, quality: q, url: url)
-                    return ResolvedPlayURL(url: url, quality: q, resolvedTrack: alt)
-                } catch {
-                    if case HTTPClientError.tooManyRequests = error { throw error }
-                    continue
-                }
-            }
-            throw error
-        }
     }
 
     private func resolveDirectURL(for track: MusicInfo, isRefresh: Bool) async throws -> ResolvedPlayURL {
         let supported = userApiStore.supportedQualities(for: track.source)
-        let targetQuality = MusicMatcher.resolvePlayQuality(
+        let targetQuality = AudioQuality.resolvePlayQuality(
             preferred: settingsStore.settings.playQuality,
             musicInfo: track,
             supportedBySource: supported
         )
 
         if !isRefresh, let cached = PersistenceStore.shared.getCachedMusicUrl(musicId: track.id, quality: targetQuality) {
-            return ResolvedPlayURL(url: cached, quality: targetQuality, resolvedTrack: track)
+            return ResolvedPlayURL(url: cached, quality: targetQuality)
         }
 
         let url = try await userApiStore.requestMusicUrl(source: track.source, quality: targetQuality, musicInfo: track)
         PersistenceStore.shared.saveCachedMusicUrl(musicId: track.id, quality: targetQuality, url: url)
-        return ResolvedPlayURL(url: url, quality: targetQuality, resolvedTrack: track)
+        return ResolvedPlayURL(url: url, quality: targetQuality)
     }
 
-    // MARK: - Cover & Lyrics Loading (with Cache + Cross-Source Fallback)
+    // MARK: - Cover & Lyrics Loading (with Cache)
 
     private func loadCoverArt(for track: MusicInfo, sessionToken: UUID) async {
         if let pic = track.meta.picUrl, !pic.isEmpty {
@@ -727,26 +654,6 @@ final class PlayerController {
             PersistenceStore.shared.saveCachedLyric(musicId: track.id, info: info)
             guard playSessionToken == sessionToken else { return }
             applyLyricInfo(info)
-            return
-        }
-
-        // Cross-source lyric fallback
-        guard settingsStore.settings.allowAutoSwitchSource else { return }
-        let alts = await MusicMatcher.findOtherSourceMatches(for: track)
-        for alt in alts {
-            guard playSessionToken == sessionToken else { return }
-            if let cached = PersistenceStore.shared.getCachedLyric(musicId: alt.id, source: alt.source) {
-                applyLyricInfo(cached)
-                return
-            }
-            if let sdk = MusicSDKRegistry.shared.sdk(for: alt.source),
-               let info = try? await sdk.getLyric(musicInfo: alt),
-               RegexHelper.test(#"\[\d{1,2}:.*\d{1,4}\]"#, in: info.lyric) {
-                PersistenceStore.shared.saveCachedLyric(musicId: alt.id, info: info)
-                guard playSessionToken == sessionToken else { return }
-                applyLyricInfo(info)
-                return
-            }
         }
     }
 

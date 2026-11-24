@@ -147,12 +147,6 @@ struct MusicRowView: View {
         }
 
         Button {
-            env.trackPendingSourceSwitch = track
-        } label: {
-            Label("换源查找同名歌曲", systemImage: "arrow.triangle.2.circlepath")
-        }
-
-        Button {
             UIPasteboard.general.string = "\(track.name) - \(track.singer)"
             env.showToast("已复制歌曲信息")
         } label: {

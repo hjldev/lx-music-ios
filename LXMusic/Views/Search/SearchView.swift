@@ -1,10 +1,9 @@
 import SwiftUI
 
-/// Multi-source Search (`搜索`) supporting Music & SongList search, aggregated ("聚合") cross-source search,
+/// Kuwo Music Search (`搜索`) supporting Music & SongList search,
 /// real-time search suggestions (`tipSearch`), hot search words (`hotSearch`), and persistent search history.
 struct SearchView: View {
     let accentColor: Color
-    @Environment(SettingsStore.self) private var settingsStore
     @Environment(LibraryStore.self) private var library
     @Environment(PlayerController.self) private var player
 
@@ -15,7 +14,6 @@ struct SearchView: View {
 
     @State private var searchText: String = ""
     @State private var mode: SearchMode = .music
-    @State private var scope: SearchSourceScope = .all
 
     @State private var musicResults: [MusicInfo] = []
     @State private var songListResults: [OnlineSongListItem] = []
@@ -30,6 +28,10 @@ struct SearchView: View {
 
     @State private var tipTask: Task<Void, Never>?
     @FocusState private var isSearchFocused: Bool
+
+    private var sdk: KWMusicSDK {
+        MusicSDKRegistry.shared.kw
+    }
 
     var body: some View {
         NavigationStack {
@@ -88,22 +90,12 @@ struct SearchView: View {
                 }
                 .pickerStyle(.segmented)
                 .padding(.horizontal, 16)
-                .padding(.bottom, 6)
+                .padding(.bottom, 8)
                 .onChange(of: mode) { _, _ in
                     if hasExecutedSearch && !searchText.isEmpty {
                         executeSearch(query: searchText)
                     }
                 }
-
-                SearchScopePickerBar(selected: $scope, accentColor: accentColor)
-                    .onChange(of: scope) { _, newScope in
-                        settingsStore.settings.defaultSearchScope = newScope
-                        if hasExecutedSearch && !searchText.isEmpty {
-                            executeSearch(query: searchText)
-                        } else {
-                            Task { await loadHotSearch() }
-                        }
-                    }
 
                 Divider()
 
@@ -115,7 +107,6 @@ struct SearchView: View {
                 SongListDetailView(item: item, accentColor: accentColor)
             }
             .task {
-                scope = settingsStore.settings.defaultSearchScope
                 if hotWords.isEmpty {
                     await loadHotSearch()
                 }
@@ -344,9 +335,7 @@ struct SearchView: View {
         tipTask = Task {
             try? await Task.sleep(nanoseconds: 250_000_000)
             guard !Task.isCancelled else { return }
-            let src = scope.musicSource ?? .kw
-            if let sdk = MusicSDKRegistry.shared.sdk(for: src),
-               let tips = try? await sdk.getTipSearch(query: trimmed),
+            if let tips = try? await sdk.getTipSearch(query: trimmed),
                !Task.isCancelled {
                 tipSuggestions = Array(tips.prefix(10))
             }
@@ -354,9 +343,7 @@ struct SearchView: View {
     }
 
     private func loadHotSearch() async {
-        let src = scope.musicSource ?? .kw
-        if let sdk = MusicSDKRegistry.shared.sdk(for: src),
-           let words = try? await sdk.getHotSearch() {
+        if let words = try? await sdk.getHotSearch() {
             hotWords = words
         }
     }
@@ -384,77 +371,23 @@ struct SearchView: View {
 
         do {
             if mode == .music {
-                if let singleSource = scope.musicSource, let sdk = MusicSDKRegistry.shared.sdk(for: singleSource) {
-                    let res = try await sdk.searchMusic(query: trimmed, page: page, limit: 30)
-                    let existing = Set(musicResults.map(\.id))
-                    musicResults.append(contentsOf: res.list.filter { !existing.contains($0.id) })
-                    hasMore = page < res.allPage && !res.list.isEmpty
-                    page += 1
-                } else {
-                    // Aggregated ("聚合") parallel search across all 5 sources, interleaved fairly
-                    let currentPage = page
-                    let batches: [[MusicInfo]] = await withTaskGroup(of: (Int, [MusicInfo]).self) { group in
-                        let sdks = MusicSDKRegistry.shared.allOnlineSDKs
-                        for (idx, sdk) in sdks.enumerated() {
-                            group.addTask {
-                                let list = (try? await sdk.searchMusic(query: trimmed, page: currentPage, limit: 15).list) ?? []
-                                return (idx, list)
-                            }
-                        }
-                        var ordered = Array(repeating: [MusicInfo](), count: sdks.count)
-                        for await (idx, list) in group { ordered[idx] = list }
-                        return ordered
-                    }
-                    let interleaved = interleave(batches)
-                    let existing = Set(musicResults.map(\.id))
-                    musicResults.append(contentsOf: interleaved.filter { !existing.contains($0.id) })
-                    hasMore = !interleaved.isEmpty && currentPage < 5
-                    page += 1
-                }
+                let res = try await sdk.searchMusic(query: trimmed, page: page, limit: 30)
+                let existing = Set(musicResults.map(\.id))
+                musicResults.append(contentsOf: res.list.filter { !existing.contains($0.id) })
+                hasMore = page < res.allPage && !res.list.isEmpty
+                page += 1
             } else {
-                if let singleSource = scope.musicSource, let sdk = MusicSDKRegistry.shared.sdk(for: singleSource) {
-                    let res = try await sdk.searchSongList(query: trimmed, page: page, limit: 20)
-                    let existing = Set(songListResults.map(\.uniqueKey))
-                    songListResults.append(contentsOf: res.list.filter { !existing.contains($0.uniqueKey) })
-                    hasMore = songListResults.count < res.total && !res.list.isEmpty
-                    page += 1
-                } else {
-                    let currentPage = page
-                    let batches: [[OnlineSongListItem]] = await withTaskGroup(of: (Int, [OnlineSongListItem]).self) { group in
-                        let sdks = MusicSDKRegistry.shared.allOnlineSDKs
-                        for (idx, sdk) in sdks.enumerated() {
-                            group.addTask {
-                                let list = (try? await sdk.searchSongList(query: trimmed, page: currentPage, limit: 10).list) ?? []
-                                return (idx, list)
-                            }
-                        }
-                        var ordered = Array(repeating: [OnlineSongListItem](), count: sdks.count)
-                        for await (idx, list) in group { ordered[idx] = list }
-                        return ordered
-                    }
-                    let interleaved = interleave(batches)
-                    let existing = Set(songListResults.map(\.uniqueKey))
-                    songListResults.append(contentsOf: interleaved.filter { !existing.contains($0.uniqueKey) })
-                    hasMore = !interleaved.isEmpty && currentPage < 5
-                    page += 1
-                }
+                let res = try await sdk.searchSongList(query: trimmed, page: page, limit: 20)
+                let existing = Set(songListResults.map(\.uniqueKey))
+                songListResults.append(contentsOf: res.list.filter { !existing.contains($0.uniqueKey) })
+                hasMore = songListResults.count < res.total && !res.list.isEmpty
+                page += 1
             }
         } catch {
             if reset {
                 errorMessage = error.localizedDescription
             }
         }
-    }
-
-    private func interleave<T>(_ arrays: [[T]]) -> [T] {
-        let maxLen = arrays.map(\.count).max() ?? 0
-        var out: [T] = []
-        for i in 0..<maxLen {
-            for arr in arrays where i < arr.count {
-                out.append(arr[i])
-            }
-        }
-        return out
     }
 }
 

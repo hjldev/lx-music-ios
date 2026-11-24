@@ -52,32 +52,9 @@ struct MusicMeta: Codable, Hashable, Sendable {
     var qualitys: [MusicQualityItem]
     var _qualitys: [String: MusicQualityMeta]
 
-    // KG specific
-    var hash: String?
-    var albumAudioId: String?
-
-    // TX specific
-    var strMediaMid: String?
-    var id: Int64?
-    var albumMid: String?
-
-    // MG specific
-    var copyrightId: String?
-    var lrcUrl: String?
-    var mrcUrl: String?
-    var trcUrl: String?
-
     // Local specific
     var filePath: String?
     var ext: String?
-
-    // User-pinned alternative source track (`toggleMusicInfo`)
-    var toggleMusicInfoBox: Box<MusicInfo>?
-
-    var toggleMusicInfo: MusicInfo? {
-        get { toggleMusicInfoBox?.value }
-        set { toggleMusicInfoBox = newValue.map { Box($0) } }
-    }
 
     init(
         songId: String,
@@ -86,18 +63,8 @@ struct MusicMeta: Codable, Hashable, Sendable {
         albumId: String? = nil,
         qualitys: [MusicQualityItem] = [],
         _qualitys: [String: MusicQualityMeta]? = nil,
-        hash: String? = nil,
-        albumAudioId: String? = nil,
-        strMediaMid: String? = nil,
-        id: Int64? = nil,
-        albumMid: String? = nil,
-        copyrightId: String? = nil,
-        lrcUrl: String? = nil,
-        mrcUrl: String? = nil,
-        trcUrl: String? = nil,
         filePath: String? = nil,
-        ext: String? = nil,
-        toggleMusicInfo: MusicInfo? = nil
+        ext: String? = nil
     ) {
         self.songId = songId
         self.albumName = albumName
@@ -113,27 +80,13 @@ struct MusicMeta: Codable, Hashable, Sendable {
             }
             self._qualitys = dict
         }
-        self.hash = hash
-        self.albumAudioId = albumAudioId
-        self.strMediaMid = strMediaMid
-        self.id = id
-        self.albumMid = albumMid
-        self.copyrightId = copyrightId
-        self.lrcUrl = lrcUrl
-        self.mrcUrl = mrcUrl
-        self.trcUrl = trcUrl
         self.filePath = filePath
         self.ext = ext
-        self.toggleMusicInfoBox = toggleMusicInfo.map { Box($0) }
     }
 
     enum CodingKeys: String, CodingKey {
         case songId, albumName, picUrl, albumId, qualitys, _qualitys
-        case hash, albumAudioId
-        case strMediaMid, id, albumMid
-        case copyrightId, lrcUrl, mrcUrl, trcUrl
         case filePath, ext
-        case toggleMusicInfo
     }
 
     init(from decoder: Decoder) throws {
@@ -159,28 +112,8 @@ struct MusicMeta: Codable, Hashable, Sendable {
             self._qualitys = dict
         }
 
-        self.hash = try? c.decodeIfPresent(String.self, forKey: .hash)
-        self.albumAudioId = c.decodeFlexibleString(forKey: .albumAudioId)
-        self.strMediaMid = try? c.decodeIfPresent(String.self, forKey: .strMediaMid)
-        if let intId = try? c.decodeIfPresent(Int64.self, forKey: .id) {
-            self.id = intId
-        } else if let strId = try? c.decodeIfPresent(String.self, forKey: .id), let parsed = Int64(strId) {
-            self.id = parsed
-        } else {
-            self.id = nil
-        }
-        self.albumMid = try? c.decodeIfPresent(String.self, forKey: .albumMid)
-        self.copyrightId = c.decodeFlexibleString(forKey: .copyrightId)
-        self.lrcUrl = try? c.decodeIfPresent(String.self, forKey: .lrcUrl)
-        self.mrcUrl = try? c.decodeIfPresent(String.self, forKey: .mrcUrl)
-        self.trcUrl = try? c.decodeIfPresent(String.self, forKey: .trcUrl)
         self.filePath = try? c.decodeIfPresent(String.self, forKey: .filePath)
         self.ext = try? c.decodeIfPresent(String.self, forKey: .ext)
-        if let toggle = try? c.decodeIfPresent(MusicInfo.self, forKey: .toggleMusicInfo) {
-            self.toggleMusicInfoBox = Box(toggle)
-        } else {
-            self.toggleMusicInfoBox = nil
-        }
     }
 
     func encode(to encoder: Encoder) throws {
@@ -191,27 +124,9 @@ struct MusicMeta: Codable, Hashable, Sendable {
         try c.encodeIfPresent(albumId, forKey: .albumId)
         try c.encode(qualitys, forKey: .qualitys)
         try c.encode(_qualitys, forKey: ._qualitys)
-        try c.encodeIfPresent(hash, forKey: .hash)
-        try c.encodeIfPresent(albumAudioId, forKey: .albumAudioId)
-        try c.encodeIfPresent(strMediaMid, forKey: .strMediaMid)
-        try c.encodeIfPresent(id, forKey: .id)
-        try c.encodeIfPresent(albumMid, forKey: .albumMid)
-        try c.encodeIfPresent(copyrightId, forKey: .copyrightId)
-        try c.encodeIfPresent(lrcUrl, forKey: .lrcUrl)
-        try c.encodeIfPresent(mrcUrl, forKey: .mrcUrl)
-        try c.encodeIfPresent(trcUrl, forKey: .trcUrl)
         try c.encodeIfPresent(filePath, forKey: .filePath)
         try c.encodeIfPresent(ext, forKey: .ext)
-        try c.encodeIfPresent(toggleMusicInfoBox?.value, forKey: .toggleMusicInfo)
     }
-}
-
-/// Value-type box enabling recursive `MusicInfo` references (for `toggleMusicInfo`).
-final class Box<T: Hashable & Sendable>: Hashable, Sendable {
-    let value: T
-    init(_ value: T) { self.value = value }
-    static func == (lhs: Box<T>, rhs: Box<T>) -> Bool { lhs.value == rhs.value }
-    func hash(into hasher: inout Hasher) { hasher.combine(value) }
 }
 
 /// Core music track model matching LX Music Desktop v2 (`LX.Music.MusicInfo`).
@@ -265,7 +180,7 @@ struct MusicInfo: Codable, Identifiable, Hashable, Sendable {
             _types[item.type.rawValue] = mapObj
         }
 
-        var dict: [String: Any] = [
+        return [
             "name": name,
             "singer": singer,
             "source": source.rawValue,
@@ -279,25 +194,6 @@ struct MusicInfo: Codable, Identifiable, Hashable, Sendable {
             "_types": _types,
             "typeUrl": [String: Any](),
         ]
-
-        switch source {
-        case .kg:
-            dict["hash"] = meta.hash ?? ""
-            if let audioId = meta.albumAudioId { dict["albumAudioId"] = audioId }
-        case .tx:
-            dict["strMediaMid"] = meta.strMediaMid ?? meta.songId
-            if let numId = meta.id { dict["songId"] = numId }
-            if let albumMid = meta.albumMid { dict["albumMid"] = albumMid }
-        case .mg:
-            dict["copyrightId"] = meta.copyrightId ?? meta.songId
-            if let lrcUrl = meta.lrcUrl { dict["lrcUrl"] = lrcUrl }
-            if let mrcUrl = meta.mrcUrl { dict["mrcUrl"] = mrcUrl }
-            if let trcUrl = meta.trcUrl { dict["trcUrl"] = trcUrl }
-        case .kw, .wy, .local:
-            break
-        }
-
-        return dict
     }
 
     /// Builds a v2 `MusicInfo` from a legacy v1 JSON dictionary (used when importing v1 `.lxmc` backups).
@@ -338,35 +234,14 @@ struct MusicInfo: Codable, Identifiable, Hashable, Sendable {
             }
         }
 
-        let hash = dict["hash"] as? String
-        let id: String
-        if source == .kg, let h = hash, !h.isEmpty {
-            id = "\(songmid)_\(h)"
-        } else {
-            id = "\(source.rawValue)_\(songmid)"
-        }
-
-        let txNumericId: Int64?
-        if let n = dict["songId"] as? Int64 { txNumericId = n }
-        else if let n = dict["songId"] as? Int { txNumericId = Int64(n) }
-        else { txNumericId = nil }
-
+        let id = "\(source.rawValue)_\(songmid)"
         let meta = MusicMeta(
             songId: songmid,
             albumName: albumName,
             picUrl: img,
             albumId: albumId,
             qualitys: qualitys,
-            _qualitys: _qualitys,
-            hash: hash,
-            albumAudioId: (dict["albumAudioId"] as? String) ?? (dict["albumAudioId"] as? Int).map(String.init),
-            strMediaMid: dict["strMediaMid"] as? String,
-            id: txNumericId,
-            albumMid: dict["albumMid"] as? String,
-            copyrightId: dict["copyrightId"] as? String,
-            lrcUrl: dict["lrcUrl"] as? String,
-            mrcUrl: dict["mrcUrl"] as? String,
-            trcUrl: dict["trcUrl"] as? String
+            _qualitys: _qualitys
         )
 
         return MusicInfo(

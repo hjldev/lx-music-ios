@@ -101,18 +101,20 @@ enum LXMCBackupCodec {
 
         switch type {
         case "playList_v2":
-            let normalizedData = try JSONSerialization.data(withJSONObject: root["data"] ?? [])
-            let lists = try decoder.decode([UserPlaylist].self, from: normalizedData)
+            let rawLists = (root["data"] as? [[String: Any]]) ?? []
+            let lists = decodeV2Playlists(rawLists, decoder: decoder)
             return ImportResult(type: type, playlists: sanitizePlaylists(lists), isSinglePlaylist: false)
 
         case "playListPart_v2":
-            let normalizedData = try JSONSerialization.data(withJSONObject: root["data"] ?? [:])
-            let list = try decoder.decode(UserPlaylist.self, from: normalizedData)
-            return ImportResult(type: type, playlists: sanitizePlaylists([list]), isSinglePlaylist: true)
+            if let rawList = root["data"] as? [String: Any],
+               let list = decodeV2Playlists([rawList], decoder: decoder).first {
+                return ImportResult(type: type, playlists: sanitizePlaylists([list]), isSinglePlaylist: true)
+            }
+            throw CodecError.invalidFileFormat
 
         case "allData_v2":
-            let normalizedData = try JSONSerialization.data(withJSONObject: root["playList"] ?? [])
-            let lists = try decoder.decode([UserPlaylist].self, from: normalizedData)
+            let rawLists = (root["playList"] as? [[String: Any]]) ?? []
+            let lists = decodeV2Playlists(rawLists, decoder: decoder)
             return ImportResult(type: type, playlists: sanitizePlaylists(lists), isSinglePlaylist: false)
 
         case "playList":
@@ -143,6 +145,26 @@ enum LXMCBackupCodec {
 
         default:
             throw CodecError.unsupportedBackupType(type)
+        }
+    }
+
+    private static func decodeV2Playlists(_ rawLists: [[String: Any]], decoder: JSONDecoder) -> [UserPlaylist] {
+        rawLists.compactMap { raw in
+            var copy = raw
+            if let srcStr = copy["source"] as? String, MusicSource(rawValue: srcStr) == nil {
+                copy.removeValue(forKey: "source")
+            }
+            if let rawSongs = copy["list"] as? [[String: Any]] {
+                copy["list"] = rawSongs.filter { song in
+                    guard let s = song["source"] as? String else { return false }
+                    return MusicSource(rawValue: s) != nil
+                }
+            }
+            guard let data = try? JSONSerialization.data(withJSONObject: copy),
+                  let playlist = try? decoder.decode(UserPlaylist.self, from: data) else {
+                return nil
+            }
+            return playlist
         }
     }
 

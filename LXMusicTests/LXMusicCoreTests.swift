@@ -3,38 +3,7 @@ import XCTest
 
 final class LXMusicCoreTests: XCTestCase {
 
-    // MARK: - 1. Crypto & Signatures
-
-    func testTXZzcSignSafeIndex40() {
-        let input = "{\"comm\":{\"ct\":\"19\",\"uin\":\"0\"}}"
-        let sign = TXMusicSDK.zzcSign(input)
-        XCTAssertTrue(sign.hasPrefix("zzc"))
-        XCTAssertEqual(sign, sign.lowercased())
-        // zzc (3) + part1 (7 chars, index 40 omitted!) + b64Part (<=27 chars) + part2 (8 chars)
-        XCTAssertGreaterThan(sign.count, 25)
-    }
-
-    func testWYEapiAndLinuxapiCrypto() throws {
-        let eapiForm = try WYMusicSDK.eapi(url: "/api/song/lyric/v1", object: ["id": "12345"])
-        XCTAssertNotNil(eapiForm["params"])
-        XCTAssertEqual(eapiForm["params"], eapiForm["params"]?.uppercased())
-
-        let linuxForm = try WYMusicSDK.linuxapi(["method": "POST", "url": "https://music.163.com/api/v3/playlist/detail"])
-        XCTAssertNotNil(linuxForm["eparams"])
-
-        let weapiForm = try WYMusicSDK.weapi(["s": "周杰伦"])
-        XCTAssertFalse((weapiForm["params"] ?? "").isEmpty)
-        XCTAssertEqual(weapiForm["encSecKey"]?.count, 256)
-    }
-
-    func testKGAndMGSignatures() {
-        let kgSig = KGMusicSDK.signatureParams("appid=1058&page=1", platform: "web")
-        XCTAssertEqual(kgSig.count, 32)
-        let infSig = KGMusicSDK.infSignPlaylist(specialId: "12345", page: 1, limit: 100)
-        XCTAssertEqual(infSig.count, 32)
-        let mgSig = MGMusicSDK.createSignature(time: "1700000000000", query: "稻香")
-        XCTAssertEqual(mgSig.count, 32)
-    }
+    // MARK: - 1. Crypto & Compression
 
     func testZlibAndGzipRoundTrip() throws {
         let original = Data("Hello LX Music 原生 iOS 应用! 🎵".utf8)
@@ -77,61 +46,14 @@ final class LXMusicCoreTests: XCTestCase {
         XCTAssertEqual(progress, 0.5, accuracy: 0.01)
     }
 
-    func testKGKRCDecode() throws {
-        // Synthesize a valid KRC payload: "krc1" + XOR(zlib(krcText), krcKey)
-        let langJSON = "{\"content\":[{\"type\":1,\"lyricContent\":[[\"Hello\"]]}]}"
-        let langB64 = Data(langJSON.utf8).base64EncodedString()
-        let krcText = "[id:$00000000]\n[language:\(langB64)]\n[1000,2000]<0,500,0>你好"
-        let compressed = try CryptoUtils.zlibDeflate(Data(krcText.utf8))
-        let krcKey: [UInt8] = [0x40, 0x47, 0x61, 0x77, 0x5E, 0x32, 0x74, 0x47, 0x51, 0x36, 0x31, 0x2D, 0xCE, 0xD2, 0x6E, 0x69]
-        var xored = [UInt8](compressed)
-        for i in 0..<xored.count { xored[i] ^= krcKey[i % 16] }
-        let payload = Data("krc1".utf8) + Data(xored)
-
-        let decoded = try KGMusicSDK.decodeKRC(base64Content: payload.base64EncodedString())
-        XCTAssertTrue(decoded.lyric.contains("[00:01.000]你好"))
-        XCTAssertTrue((decoded.lxlyric ?? "").contains("<0,500>你好"))
-        XCTAssertTrue((decoded.tlyric ?? "").contains("[00:01.000]Hello"))
-    }
-
-    // MARK: - 3. Cross-Source Matching (`findMusic`) & Quality Downgrade
-
-    func testMusicMatcherVersionGuardAndRanking() {
-        let target = MusicInfo(
-            id: "wy_1",
-            name: "稻香",
-            singer: "周杰伦",
-            source: .wy,
-            interval: "03:43",
-            meta: MusicMeta(songId: "1", albumName: "魔杰座")
-        )
-        let liveTrack = MusicInfo(
-            id: "kw_live",
-            name: "稻香 (Live)",
-            singer: "周杰伦",
-            source: .kw,
-            interval: "03:44",
-            meta: MusicMeta(songId: "live", albumName: "演唱会")
-        )
-        let exactMatch = MusicInfo(
-            id: "tx_exact",
-            name: "稻香",
-            singer: "周杰伦",
-            source: .tx,
-            interval: "03:43",
-            meta: MusicMeta(songId: "exact", albumName: "魔杰座")
-        )
-
-        let ranked = MusicMatcher.rankCandidates(target: target, candidateLists: [[liveTrack], [exactMatch]])
-        XCTAssertEqual(ranked.map(\.id), ["tx_exact"])
-    }
+    // MARK: - 3. Quality Downgrade Order
 
     func testQualityDowngradeOrder() {
         let track = MusicInfo(
-            id: "wy_1",
+            id: "kw_1",
             name: "Song",
             singer: "Artist",
-            source: .wy,
+            source: .kw,
             meta: MusicMeta(
                 songId: "1",
                 qualitys: [
@@ -140,7 +62,7 @@ final class LXMusicCoreTests: XCTestCase {
                 ]
             )
         )
-        let chosen = MusicMatcher.resolvePlayQuality(
+        let chosen = AudioQuality.resolvePlayQuality(
             preferred: .flac24bit,
             musicInfo: track,
             supportedBySource: [.k128, .k320, .flac]
@@ -155,11 +77,11 @@ final class LXMusicCoreTests: XCTestCase {
         let store = DislikeStore()
         store.updateRules("BadSong@Artist\nOnlySong\n@BlockedSinger\nA#B@Singer")
 
-        let exact = MusicInfo(id: "1", name: "badsong", singer: "artist", source: .wy, meta: MusicMeta(songId: "1"))
-        let bySong = MusicInfo(id: "2", name: "OnlySong", singer: "Anyone", source: .wy, meta: MusicMeta(songId: "2"))
-        let bySinger = MusicInfo(id: "3", name: "Random", singer: "BlockedSinger", source: .wy, meta: MusicMeta(songId: "3"))
-        let withAtSign = MusicInfo(id: "4", name: "A@B", singer: "Singer", source: .wy, meta: MusicMeta(songId: "4"))
-        let ok = MusicInfo(id: "5", name: "GoodSong", singer: "GoodSinger", source: .wy, meta: MusicMeta(songId: "5"))
+        let exact = MusicInfo(id: "1", name: "badsong", singer: "artist", source: .kw, meta: MusicMeta(songId: "1"))
+        let bySong = MusicInfo(id: "2", name: "OnlySong", singer: "Anyone", source: .kw, meta: MusicMeta(songId: "2"))
+        let bySinger = MusicInfo(id: "3", name: "Random", singer: "BlockedSinger", source: .kw, meta: MusicMeta(songId: "3"))
+        let withAtSign = MusicInfo(id: "4", name: "A@B", singer: "Singer", source: .kw, meta: MusicMeta(songId: "4"))
+        let ok = MusicInfo(id: "5", name: "GoodSong", singer: "GoodSinger", source: .kw, meta: MusicMeta(songId: "5"))
 
         XCTAssertTrue(store.hasDislike(exact))
         XCTAssertTrue(store.hasDislike(bySong))
@@ -200,7 +122,7 @@ final class LXMusicCoreTests: XCTestCase {
         send(EVENT_NAMES.inited, {
           status: true,
           sources: {
-            wy: { type: 'music', actions: ['musicUrl'], qualitys: ['128k', '320k'] }
+            kw: { type: 'music', actions: ['musicUrl'], qualitys: ['128k', '320k'] }
           }
         });
         """
@@ -219,9 +141,9 @@ final class LXMusicCoreTests: XCTestCase {
         engine.load(script: script)
         await fulfillment(of: [initedExpectation], timeout: 5.0)
 
-        let track = MusicInfo(id: "wy_42", name: "Test", singer: "Singer", source: .wy, meta: MusicMeta(songId: "42"))
-        let url = try await engine.requestMusicUrl(source: .wy, quality: .k320, musicInfo: track)
-        let expectedHash = CryptoUtils.md5Hex("wy_42_320k")
+        let track = MusicInfo(id: "kw_42", name: "Test", singer: "Singer", source: .kw, meta: MusicMeta(songId: "42"))
+        let url = try await engine.requestMusicUrl(source: .kw, quality: .k320, musicInfo: track)
+        let expectedHash = CryptoUtils.md5Hex("kw_42_320k")
         XCTAssertEqual(url, "https://cdn.example.com/\(expectedHash).mp3")
         engine.unload()
     }

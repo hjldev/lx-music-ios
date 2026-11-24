@@ -14,7 +14,6 @@ final class AppEnvironment {
     var showFullPlayer: Bool = false
     var showPlayQueue: Bool = false
     var trackPendingAddToPlaylist: [MusicInfo]? = nil
-    var trackPendingSourceSwitch: MusicInfo? = nil
     var toastMessage: String? = nil
     private var toastTask: Task<Void, Never>?
 

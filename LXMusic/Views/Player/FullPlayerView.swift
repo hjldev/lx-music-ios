@@ -97,7 +97,7 @@ struct FullPlayerView: View {
                             .foregroundStyle(.white.opacity(0.75))
                             .lineLimit(1)
 
-                        Text(sourceBadgeText(for: track))
+                        Text(track.source.shortName)
                             .font(.system(size: 10, weight: .semibold))
                             .foregroundStyle(.white)
                             .padding(.horizontal, 6)
@@ -117,32 +117,10 @@ struct FullPlayerView: View {
             }
             .frame(maxWidth: .infinity)
 
-            Button {
-                if let track = player.currentTrack {
-                    closePlayer()
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        env.trackPendingSourceSwitch = track
-                    }
-                }
-            } label: {
-                Image(systemName: "arrow.triangle.2.circlepath")
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .frame(width: 38, height: 38)
-                    .background(Color.white.opacity(0.14), in: Circle())
-                    .contentShape(Circle())
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("切换音源")
+            Color.clear
+                .frame(width: 38, height: 38)
         }
         .padding(.horizontal, 16)
-    }
-
-    private func sourceBadgeText(for track: MusicInfo) -> String {
-        if let switched = player.switchedSourceTrack, switched.source != track.source {
-            return "\(track.source.shortName)→\(switched.source.shortName)"
-        }
-        return track.source.shortName
     }
 
     // MARK: - Artwork Page

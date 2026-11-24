@@ -9,7 +9,6 @@ enum MusicSDKError: LocalizedError {
     case picNotFound
     case noActiveCustomSource
     case customSourceNotSupported(MusicSource)
-    case toggleSourceFailed
 
     var errorDescription: String? {
         switch self {
@@ -21,12 +20,11 @@ enum MusicSDKError: LocalizedError {
         case .picNotFound: return "未找到封面图片"
         case .noActiveCustomSource: return "未启用自定义音源脚本，请先在「设置 -> 自定义音源」中导入并启用"
         case .customSourceNotSupported(let s): return "当前自定义音源不支持 \(s.displayName)"
-        case .toggleSourceFailed: return "换源失败，未能找到可用播放链接"
         }
     }
 }
 
-/// Unified interface implemented by all 5 online Music SDKs (`kw`, `kg`, `tx`, `wy`, `mg`).
+/// Unified interface for online Music SDKs (Kuwo).
 protocol MusicSDK: Sendable {
     var source: MusicSource { get }
     var songListSortOptions: [SongListSortOption] { get }
@@ -47,29 +45,21 @@ protocol MusicSDK: Sendable {
     func getPic(musicInfo: MusicInfo) async throws -> String
 }
 
-/// Central registry exposing all 5 built-in Music SDKs.
+/// Central registry exposing the built-in Kuwo Music SDK.
 final class MusicSDKRegistry: @unchecked Sendable {
     static let shared = MusicSDKRegistry()
 
     let kw = KWMusicSDK()
-    let kg = KGMusicSDK()
-    let tx = TXMusicSDK()
-    let wy = WYMusicSDK()
-    let mg = MGMusicSDK()
 
     func sdk(for source: MusicSource) -> MusicSDK? {
         switch source {
         case .kw: return kw
-        case .kg: return kg
-        case .tx: return tx
-        case .wy: return wy
-        case .mg: return mg
         case .local: return nil
         }
     }
 
     var allOnlineSDKs: [MusicSDK] {
-        [kw, kg, tx, wy, mg]
+        [kw]
     }
 }
 

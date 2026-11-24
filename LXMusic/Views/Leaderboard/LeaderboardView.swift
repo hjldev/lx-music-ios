@@ -1,13 +1,11 @@
 import SwiftUI
 
-/// Multi-source Music Leaderboard (`排行榜`) covering all 10–51 charts across KW/KG/TX/WY/MG.
+/// Kuwo Music Leaderboard (`排行榜`) covering all built-in charts.
 struct LeaderboardView: View {
     let accentColor: Color
     @Environment(AppEnvironment.self) private var env
-    @Environment(SettingsStore.self) private var settingsStore
     @Environment(PlayerController.self) private var player
 
-    @State private var selectedSource: MusicSource = .kw
     @State private var selectedBoard: LeaderboardBoard?
     @State private var tracks: [MusicInfo] = []
     @State private var page: Int = 1
@@ -18,14 +16,12 @@ struct LeaderboardView: View {
     @State private var showAllBoardsSheet = false
 
     private var boards: [LeaderboardBoard] {
-        MusicSDKRegistry.shared.sdk(for: selectedSource)?.leaderboardBoards ?? []
+        MusicSDKRegistry.shared.kw.leaderboardBoards
     }
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                SourcePickerBar(selected: $selectedSource, accentColor: accentColor)
-
                 // Quick Horizontal Board Strip + "全部榜单" Button
                 HStack(spacing: 6) {
                     ScrollView(.horizontal, showsIndicators: false) {
@@ -62,7 +58,7 @@ struct LeaderboardView: View {
                     }
                     .buttonStyle(.plain)
                 }
-                .padding(.vertical, 6)
+                .padding(.vertical, 8)
 
                 Divider()
 
@@ -84,15 +80,9 @@ struct LeaderboardView: View {
             .sheet(isPresented: $showAllBoardsSheet) {
                 allBoardsSheet
             }
-            .onChange(of: selectedSource) { _, newSource in
-                settingsStore.settings.defaultLeaderboardSource = newSource
-                selectedBoard = MusicSDKRegistry.shared.sdk(for: newSource)?.leaderboardBoards.first
-                Task { await loadTracks(reset: true) }
-            }
             .task {
                 if selectedBoard == nil {
-                    selectedSource = settingsStore.settings.defaultLeaderboardSource
-                    selectedBoard = MusicSDKRegistry.shared.sdk(for: selectedSource)?.leaderboardBoards.first
+                    selectedBoard = boards.first
                     await loadTracks(reset: true)
                 }
             }
@@ -186,7 +176,7 @@ struct LeaderboardView: View {
                     }
                 }
             }
-            .navigationTitle("\(selectedSource.displayName)全部榜单（\(boards.count)）")
+            .navigationTitle("全部榜单（\(boards.count)）")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
