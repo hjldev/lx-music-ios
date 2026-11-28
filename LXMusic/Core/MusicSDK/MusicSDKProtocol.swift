@@ -54,7 +54,7 @@ final class MusicSDKRegistry: @unchecked Sendable {
     func sdk(for source: MusicSource) -> MusicSDK? {
         switch source {
         case .kw: return kw
-        case .local: return nil
+        case .kg, .tx, .wy, .mg, .local: return nil
         }
     }
 

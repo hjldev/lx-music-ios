@@ -35,11 +35,15 @@ final class PlayerController {
     private(set) var tempPlayList: [QueueItem] = []
     private(set) var playedList: [QueueItem] = []
 
+    static let maxConsecutiveFailures = 3
+
     private(set) var isPlaying: Bool = false
     private(set) var isLoading: Bool = false
     private(set) var statusText: String = ""
     private(set) var errorMessage: String?
     private(set) var activeQuality: AudioQuality = .k128
+    private(set) var activeSource: MusicSource?
+    private(set) var consecutiveFailureCount: Int = 0
 
     private(set) var currentTime: Double = 0
     private(set) var duration: Double = 0
@@ -67,6 +71,8 @@ final class PlayerController {
 
     // Internal control state
     private let audioEngine = AudioPlayerEngine()
+    private let crossSourceMatcher: CrossSourceMatcher
+    private let autoSkipDelayNanoseconds: UInt64
     private unowned let settingsStore: SettingsStore
     private unowned let libraryStore: LibraryStore
     private unowned let dislikeStore: DislikeStore
@@ -78,6 +84,8 @@ final class PlayerController {
     private var preloadedTrackId: String?
     private var cachedRandomNext: QueueItem?
     private var retryCountForCurrentTrack = 0
+    private var failedSourcesForCurrentTrack: Set<MusicSource> = []
+    private var hasLoadedAudioItem = false
     private var lastNowPlayingSyncTime: TimeInterval = 0
 
     // MARK: - Init
@@ -86,12 +94,16 @@ final class PlayerController {
         settingsStore: SettingsStore,
         libraryStore: LibraryStore,
         dislikeStore: DislikeStore,
-        userApiStore: UserApiStore
+        userApiStore: UserApiStore,
+        crossSourceMatcher: CrossSourceMatcher = .shared,
+        autoSkipDelayNanoseconds: UInt64 = 3_500_000_000
     ) {
         self.settingsStore = settingsStore
         self.libraryStore = libraryStore
         self.dislikeStore = dislikeStore
         self.userApiStore = userApiStore
+        self.crossSourceMatcher = crossSourceMatcher
+        self.autoSkipDelayNanoseconds = autoSkipDelayNanoseconds
 
         wireAudioEngineCallbacks()
     }
@@ -104,7 +116,9 @@ final class PlayerController {
             guard let self else { return }
             self.isLoading = false
             self.statusText = ""
+            self.errorMessage = nil
             self.retryCountForCurrentTrack = 0
+            self.consecutiveFailureCount = 0
         }
         audioEngine.onEnded = { [weak self] in
             self?.handlePlaybackEnded()
@@ -125,6 +139,7 @@ final class PlayerController {
     /// Plays a specific list starting at `startIndex` (clears `tempPlayList`, matching `playList`).
     func playList(tracks: [MusicInfo], startIndex: Int, listId: String) {
         guard !tracks.isEmpty, startIndex >= 0, startIndex < tracks.count else { return }
+        consecutiveFailureCount = 0
         if listId == BuiltInListID.temp {
             libraryStore.setTempList(tracks: tracks)
         }
@@ -162,9 +177,10 @@ final class PlayerController {
 
     func resume() {
         isPlayedStop = false
+        consecutiveFailureCount = 0
         guard let track = currentTrack else { return }
-        if duration == 0 && !isLoading {
-            // Re-trigger resolution if previous load failed
+        if (!hasLoadedAudioItem || duration == 0) && !isLoading {
+            // Re-trigger resolution if previous load failed or playback was stopped
             startPlaying(QueueItem(listId: currentListId ?? BuiltInListID.temp, musicInfo: track, isTempPlay: isTempPlay))
             return
         }
@@ -186,6 +202,10 @@ final class PlayerController {
         LiveActivityManager.shared.stopActivity()
         currentTrack = nil
         currentListId = nil
+        activeSource = nil
+        hasLoadedAudioItem = false
+        consecutiveFailureCount = 0
+        failedSourcesForCurrentTrack.removeAll()
         isPlaying = false
         isLoading = false
         statusText = ""
@@ -270,6 +290,9 @@ final class PlayerController {
 
     func playNext(isAutoToggle: Bool = false) {
         isPlayedStop = false
+        if !isAutoToggle {
+            consecutiveFailureCount = 0
+        }
 
         // 1. Always consume `tempPlayList` ("Play Next") first
         if !tempPlayList.isEmpty {
@@ -357,6 +380,9 @@ final class PlayerController {
 
     func playPrev(isAutoToggle: Bool = false) {
         isPlayedStop = false
+        if !isAutoToggle {
+            consecutiveFailureCount = 0
+        }
         guard let currentTrack, let backingListId = playerListId else {
             stop()
             return
@@ -529,20 +555,26 @@ final class PlayerController {
         }
     }
 
-    // MARK: - Core Track Loading & Online Resolution (`core/music/online.ts`)
+    // MARK: - Core Track Loading & Online Resolution (`core/music/online.ts` & `utils.ts`)
 
-    private func startPlaying(_ item: QueueItem, isRefresh: Bool = false) {
+    private func startPlaying(_ item: QueueItem, isRefresh: Bool = false, isAudioRetry: Bool = false) {
         playTask?.cancel()
         preloadTask?.cancel()
         preloadedTrackId = nil
         cachedRandomNext = nil
-        retryCountForCurrentTrack = 0
+        hasLoadedAudioItem = false
+
+        if !isAudioRetry {
+            retryCountForCurrentTrack = 0
+            failedSourcesForCurrentTrack.removeAll()
+        }
 
         let token = UUID()
         playSessionToken = token
 
         currentTrack = item.musicInfo
         currentListId = item.listId
+        activeSource = item.musicInfo.source
         isTempPlay = item.isTempPlay
         if !item.isTempPlay {
             playerListId = item.listId
@@ -558,36 +590,47 @@ final class PlayerController {
         isLoading = true
         isPlaying = false
         errorMessage = nil
-        statusText = "正在获取播放链接..."
+        statusText = isAudioRetry ? "播放出错，正在切换其他音源..." : "正在获取播放链接..."
         currentTime = 0
         duration = Double(FormatUtils.parseIntervalSeconds(item.musicInfo.interval))
-        currentPicUrl = item.musicInfo.meta.picUrl
-        currentLyricInfo = nil
-        parsedLyric = .empty
-        activeLyricLineIndex = nil
+        if !isAudioRetry {
+            currentPicUrl = item.musicInfo.meta.picUrl
+            currentLyricInfo = nil
+            parsedLyric = .empty
+            activeLyricLineIndex = nil
+        }
 
         audioEngine.pause()
         syncNowPlayingInfo(force: true)
 
         let track = item.musicInfo
+        let excludedSources = failedSourcesForCurrentTrack
         playTask = Task { [weak self] in
             guard let self else { return }
 
             // Fetch cover art & lyrics in parallel without blocking audio playback
-            async let picTask: Void = self.loadCoverArt(for: track, sessionToken: token)
-            async let lyricTask: Void = self.loadLyrics(for: track, sessionToken: token)
+            async let picTask: Void = self.loadCoverArt(for: track, sessionToken: token, skip: isAudioRetry)
+            async let lyricTask: Void = self.loadLyrics(for: track, sessionToken: token, skip: isAudioRetry)
 
             do {
-                let resolved = try await self.resolveDirectURL(for: track, isRefresh: isRefresh)
+                let resolved = try await self.resolvePlayURL(
+                    for: track,
+                    isRefresh: isRefresh,
+                    excludedSources: excludedSources,
+                    allowToggleSource: true,
+                    sessionToken: token
+                )
                 guard self.playSessionToken == token, !Task.isCancelled else { return }
 
                 self.activeQuality = resolved.quality
+                self.activeSource = resolved.actualSource
                 self.statusText = "正在缓冲音频..."
 
                 guard let url = URL(string: resolved.url) else {
                     throw MusicSDKError.apiError("无效的音频链接")
                 }
 
+                self.hasLoadedAudioItem = true
                 self.audioEngine.load(url: url, playbackRate: self.settingsStore.settings.playbackRate, autoPlay: true)
                 self.isPlaying = true
                 self.syncNowPlayingInfo(force: true)
@@ -600,31 +643,139 @@ final class PlayerController {
         }
     }
 
-    private struct ResolvedPlayURL {
+    struct ResolvedPlayURL: Sendable {
         let url: String
         let quality: AudioQuality
+        let actualSource: MusicSource
+        let matchedTrack: MusicInfo
     }
 
-    private func resolveDirectURL(for track: MusicInfo, isRefresh: Bool) async throws -> ResolvedPlayURL {
-        let supported = userApiStore.supportedQualities(for: track.source)
+    /// Resolves a playable audio URL for `track`, automatically falling back across `kg`, `tx`, `wy`, `mg` (and `kw`)
+    /// via `CrossSourceMatcher` when the primary source fails — mirroring `core/music/utils.ts:handleGetOnlineMusicUrl`.
+    func resolvePlayURL(
+        for track: MusicInfo,
+        isRefresh: Bool,
+        excludedSources: Set<MusicSource> = [],
+        allowToggleSource: Bool = true,
+        sessionToken: UUID? = nil
+    ) async throws -> ResolvedPlayURL {
+        guard userApiStore.activeScript != nil else {
+            throw MusicSDKError.noActiveCustomSource
+        }
+        guard userApiStore.runtimeStatus.isInitialized else {
+            throw MusicSDKError.apiError(userApiStore.runtimeStatus.message ?? "自定义音源尚未就绪")
+        }
+
+        let primarySupported = userApiStore.supportedQualities(for: track.source)
         let targetQuality = AudioQuality.resolvePlayQuality(
             preferred: settingsStore.settings.playQuality,
             musicInfo: track,
-            supportedBySource: supported
+            supportedBySource: primarySupported
         )
 
-        if !isRefresh, let cached = PersistenceStore.shared.getCachedMusicUrl(musicId: track.id, quality: targetQuality) {
-            return ResolvedPlayURL(url: cached, quality: targetQuality)
+        var primaryError: Error?
+
+        // 1. Try primary source first (unless excluded after an AVPlayer failure)
+        if !excludedSources.contains(track.source) {
+            if !isRefresh, let cached = PersistenceStore.shared.getCachedMusicUrl(musicId: track.id, quality: targetQuality) {
+                return ResolvedPlayURL(url: cached, quality: targetQuality, actualSource: track.source, matchedTrack: track)
+            }
+
+            if userApiStore.supportsSource(track.source) {
+                do {
+                    let url = try await userApiStore.requestMusicUrl(source: track.source, quality: targetQuality, musicInfo: track)
+                    PersistenceStore.shared.saveCachedMusicUrl(musicId: track.id, quality: targetQuality, url: url)
+                    return ResolvedPlayURL(url: url, quality: targetQuality, actualSource: track.source, matchedTrack: track)
+                } catch {
+                    if Task.isCancelled { throw error }
+                    if case MusicSDKError.noActiveCustomSource = error { throw error }
+                    primaryError = error
+                }
+            } else {
+                primaryError = MusicSDKError.customSourceNotSupported(track.source)
+            }
         }
 
-        let url = try await userApiStore.requestMusicUrl(source: track.source, quality: targetQuality, musicInfo: track)
-        PersistenceStore.shared.saveCachedMusicUrl(musicId: track.id, quality: targetQuality, url: url)
-        return ResolvedPlayURL(url: url, quality: targetQuality)
+        // 2. Cross-source fallback across other online platforms (`kg`, `tx`, `wy`, `mg`, `kw`)
+        guard allowToggleSource, track.source != .local else {
+            throw primaryError ?? MusicSDKError.apiError("获取播放链接失败")
+        }
+
+        var triedSources = excludedSources
+        triedSources.insert(track.source)
+
+        let eligibleSources = MusicSource.onlineSources.filter {
+            !triedSources.contains($0) && userApiStore.supportsSource($0)
+        }
+        guard !eligibleSources.isEmpty else {
+            throw primaryError ?? MusicSDKError.apiError("所有音源平台均获取播放链接失败")
+        }
+
+        if let sessionToken, self.playSessionToken == sessionToken {
+            self.statusText = "当前源失败，正在尝试换源..."
+        }
+
+        let candidates = await crossSourceMatcher.findMusic(
+            for: track,
+            in: eligibleSources,
+            ignoreCache: isRefresh
+        )
+        if Task.isCancelled { throw CancellationError() }
+
+        var lastError: Error = primaryError ?? MusicSDKError.apiError("其他平台未找到匹配歌曲")
+
+        for candidate in candidates {
+            if Task.isCancelled { throw CancellationError() }
+            guard !triedSources.contains(candidate.source) else { continue }
+            triedSources.insert(candidate.source)
+            guard userApiStore.supportsSource(candidate.source) else { continue }
+
+            let supported = userApiStore.supportedQualities(for: candidate.source)
+            var altQuality = AudioQuality.resolvePlayQuality(
+                preferred: settingsStore.settings.playQuality,
+                musicInfo: candidate,
+                supportedBySource: supported
+            )
+            if !candidate.meta._qualitys.isEmpty && !candidate.hasQuality(altQuality) {
+                if let bestAvailable = candidate.meta.qualitys
+                    .map(\.type)
+                    .filter({ supported.contains($0) })
+                    .max(by: { $0.sortRank < $1.sortRank }) {
+                    altQuality = bestAvailable
+                }
+            }
+
+            if let sessionToken, self.playSessionToken == sessionToken {
+                self.statusText = "正在尝试 \(candidate.source.shortName) 音源..."
+            }
+
+            if !isRefresh, let cached = PersistenceStore.shared.getCachedMusicUrl(musicId: candidate.id, quality: altQuality) {
+                PersistenceStore.shared.saveCachedMusicUrl(musicId: track.id, quality: targetQuality, url: cached)
+                return ResolvedPlayURL(url: cached, quality: altQuality, actualSource: candidate.source, matchedTrack: candidate)
+            }
+
+            do {
+                let url = try await userApiStore.requestMusicUrl(source: candidate.source, quality: altQuality, musicInfo: candidate)
+                PersistenceStore.shared.saveCachedMusicUrl(musicId: candidate.id, quality: altQuality, url: url)
+                PersistenceStore.shared.saveCachedMusicUrl(musicId: track.id, quality: targetQuality, url: url)
+                return ResolvedPlayURL(url: url, quality: altQuality, actualSource: candidate.source, matchedTrack: candidate)
+            } catch {
+                if Task.isCancelled { throw error }
+                if case MusicSDKError.noActiveCustomSource = error { throw error }
+                lastError = error
+            }
+        }
+
+        if candidates.isEmpty {
+            throw MusicSDKError.apiError("所有平台均获取失败（未匹配到其他平台歌曲）")
+        }
+        throw MusicSDKError.apiError("所有平台均获取播放链接失败（\(lastError.localizedDescription)）")
     }
 
     // MARK: - Cover & Lyrics Loading (with Cache)
 
-    private func loadCoverArt(for track: MusicInfo, sessionToken: UUID) async {
+    private func loadCoverArt(for track: MusicInfo, sessionToken: UUID, skip: Bool = false) async {
+        if skip { return }
         if let pic = track.meta.picUrl, !pic.isEmpty {
             if playSessionToken == sessionToken {
                 currentPicUrl = pic
@@ -641,7 +792,8 @@ final class PlayerController {
         }
     }
 
-    private func loadLyrics(for track: MusicInfo, sessionToken: UUID) async {
+    private func loadLyrics(for track: MusicInfo, sessionToken: UUID, skip: Bool = false) async {
+        if skip { return }
         if let cached = PersistenceStore.shared.getCachedLyric(musicId: track.id, source: track.source) {
             guard playSessionToken == sessionToken else { return }
             applyLyricInfo(cached)
@@ -698,7 +850,7 @@ final class PlayerController {
         preloadTask?.cancel()
         preloadTask = Task { [weak self] in
             guard let self else { return }
-            _ = try? await self.resolveDirectURL(for: nextItem.musicInfo, isRefresh: false)
+            _ = try? await self.resolvePlayURL(for: nextItem.musicInfo, isRefresh: false, allowToggleSource: true)
         }
     }
 
@@ -728,6 +880,7 @@ final class PlayerController {
 
     private func handlePlaybackEnded() {
         isPlaying = false
+        consecutiveFailureCount = 0
         if isPlayedStop {
             isPlayedStop = false
             syncNowPlayingInfo(force: true)
@@ -748,45 +901,80 @@ final class PlayerController {
     }
 
     private func handleURLResolutionFailure(_ error: Error, for track: MusicInfo, sessionToken: UUID) {
+        handleTrackPlaybackFailure(error, sessionToken: sessionToken)
+    }
+
+    private func handleAudioPlaybackError(_ error: Error) {
+        guard let track = currentTrack, !isPlayedStop else { return }
+        hasLoadedAudioItem = false
+
+        let failedSrc = activeSource ?? track.source
+        failedSourcesForCurrentTrack.insert(failedSrc)
+
+        let remainingSources = MusicSource.onlineSources.filter {
+            !failedSourcesForCurrentTrack.contains($0) && userApiStore.supportsSource($0)
+        }
+
+        if !remainingSources.isEmpty && retryCountForCurrentTrack < MusicSource.onlineSources.count {
+            retryCountForCurrentTrack += 1
+            startPlaying(
+                QueueItem(listId: currentListId ?? BuiltInListID.temp, musicInfo: track, isTempPlay: isTempPlay),
+                isRefresh: true,
+                isAudioRetry: true
+            )
+            return
+        }
+
+        handleTrackPlaybackFailure(error, sessionToken: playSessionToken)
+    }
+
+    private func handleTrackPlaybackFailure(_ error: Error, sessionToken: UUID) {
         isLoading = false
         isPlaying = false
         statusText = ""
-        errorMessage = error.localizedDescription
 
-        // Never auto-skip when user simply hasn't configured any custom source script yet!
-        if case MusicSDKError.noActiveCustomSource = error { return }
+        // Never auto-skip or count consecutive failures when no custom source script is configured
+        if case MusicSDKError.noActiveCustomSource = error {
+            errorMessage = error.localizedDescription
+            syncNowPlayingInfo(force: true)
+            return
+        }
+
+        consecutiveFailureCount += 1
+
+        if consecutiveFailureCount >= Self.maxConsecutiveFailures {
+            stopDueToConsecutiveFailures()
+            return
+        }
+
+        errorMessage = error.localizedDescription
+        syncNowPlayingInfo(force: true)
+
         guard settingsStore.settings.autoSkipOnError, !isPlayedStop else { return }
 
-        // Delay 3.5 seconds then skip to next track
+        // Delay then skip to next track
+        let delayNs = autoSkipDelayNanoseconds
         playTask = Task { [weak self] in
-            try? await Task.sleep(nanoseconds: 3_500_000_000)
+            if delayNs > 0 {
+                try? await Task.sleep(nanoseconds: delayNs)
+            }
             guard let self, self.playSessionToken == sessionToken, !Task.isCancelled else { return }
             self.playNext(isAutoToggle: true)
         }
     }
 
-    private func handleAudioPlaybackError(_ error: Error) {
-        guard let track = currentTrack, !isPlayedStop else { return }
-        if retryCountForCurrentTrack < 1 {
-            retryCountForCurrentTrack += 1
-            statusText = "播放出错，正在刷新链接..."
-            startPlaying(
-                QueueItem(listId: currentListId ?? BuiltInListID.temp, musicInfo: track, isTempPlay: isTempPlay),
-                isRefresh: true
-            )
-            return
-        }
+    private func stopDueToConsecutiveFailures() {
+        playTask?.cancel()
+        playTask = nil
+        preloadTask?.cancel()
+        preloadTask = nil
+        audioEngine.stop()
+        LiveActivityManager.shared.stopActivity()
+        hasLoadedAudioItem = false
         isLoading = false
         isPlaying = false
-        errorMessage = error.localizedDescription
-        if settingsStore.settings.autoSkipOnError {
-            let token = playSessionToken
-            playTask = Task { [weak self] in
-                try? await Task.sleep(nanoseconds: 3_500_000_000)
-                guard let self, self.playSessionToken == token, !Task.isCancelled else { return }
-                self.playNext(isAutoToggle: true)
-            }
-        }
+        statusText = ""
+        errorMessage = "连续 \(Self.maxConsecutiveFailures) 首歌曲播放失败，已停止播放"
     }
 
     private func syncNowPlayingInfo(force: Bool) {

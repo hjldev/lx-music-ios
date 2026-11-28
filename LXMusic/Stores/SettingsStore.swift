@@ -29,6 +29,7 @@ final class SettingsStore {
 
     func clearCache() {
         PersistenceStore.shared.clearAllCaches()
+        CrossSourceMatcher.shared.clearCache()
         refreshCacheSize()
     }
 }

@@ -97,7 +97,11 @@ struct FullPlayerView: View {
                             .foregroundStyle(.white.opacity(0.75))
                             .lineLimit(1)
 
-                        Text(track.source.shortName)
+                        let effectiveSource = player.activeSource ?? track.source
+                        let sourceLabel = effectiveSource == track.source
+                            ? track.source.shortName
+                            : "\(track.source.shortName)→\(effectiveSource.shortName)"
+                        Text(sourceLabel)
                             .font(.system(size: 10, weight: .semibold))
                             .foregroundStyle(.white)
                             .padding(.horizontal, 6)

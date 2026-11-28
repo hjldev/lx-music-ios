@@ -13,6 +13,7 @@
 		10F249879B3756335B248075 /* UserApiManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29B0476CB2355A9BCDB3512F /* UserApiManagerView.swift */; };
 		13ACFD086E945EEA47FF42BA /* StatusBarLyricBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEAC558454905901EFC54680 /* StatusBarLyricBar.swift */; };
 		1AD8EDB3D2FC3660D126E4D3 /* KWMusicSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFA4D1EBFD4D36CFA2691475 /* KWMusicSDK.swift */; };
+		1B7F3C9A4E218D06A5C392E1 /* CrossSourceMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5A92D1E8F4B3701E294AB6C /* CrossSourceMatcher.swift */; };
 		1E383E76E0E96C96B7792354 /* LockScreenLyricArtworkRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C4BDD6B6D567074181F602C /* LockScreenLyricArtworkRenderer.swift */; };
 		22385A26A8D4F6659D62220A /* CryptoUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C4CDCB610F81D6AA5F7F1AC /* CryptoUtils.swift */; };
 		26AFCCCB8D360F9307F9F04B /* MiniPlayerBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04A9AA841274DCA81D57519F /* MiniPlayerBar.swift */; };
@@ -105,6 +106,7 @@
 		B7CC863AE856BB83BE42D097 /* FormatUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FormatUtils.swift; path = LXMusic/Core/Network/FormatUtils.swift; sourceTree = SOURCE_ROOT; };
 		C09A2CA86780B33FE05DB998 /* MusicSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MusicSource.swift; path = LXMusic/Models/MusicSource.swift; sourceTree = SOURCE_ROOT; };
 		C3F5704DABFAC56837903221 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
+		C5A92D1E8F4B3701E294AB6C /* CrossSourceMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CrossSourceMatcher.swift; path = LXMusic/Core/MusicSDK/CrossSourceMatcher.swift; sourceTree = SOURCE_ROOT; };
 		D6F5C28B045DD8E7A08F3E1E /* SongListDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SongListDetailView.swift; path = LXMusic/Views/Discover/SongListDetailView.swift; sourceTree = SOURCE_ROOT; };
 		D8BD40A5195F29C5C97E1372 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppSettings.swift; path = LXMusic/Models/AppSettings.swift; sourceTree = SOURCE_ROOT; };
 		D9CA0A01DF3EB09FD5F285DB /* LXMCBackupCodec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LXMCBackupCodec.swift; path = LXMusic/Core/Persistence/LXMCBackupCodec.swift; sourceTree = SOURCE_ROOT; };
@@ -268,6 +270,7 @@
 		772927E1729DD7BB774D3B43 /* MusicSDK */ = {
 			isa = PBXGroup;
 			children = (
+				C5A92D1E8F4B3701E294AB6C /* CrossSourceMatcher.swift */,
 				EFA4D1EBFD4D36CFA2691475 /* KWMusicSDK.swift */,
 				B76B67D7CED4147F628480D2 /* MusicSDKProtocol.swift */,
 			);
@@ -487,6 +490,7 @@
 				22385A26A8D4F6659D62220A /* CryptoUtils.swift in Sources */,
 				AE4F511BDF5647499EF541FD /* LyricParser.swift in Sources */,
 				1AD8EDB3D2FC3660D126E4D3 /* KWMusicSDK.swift in Sources */,
+				1B7F3C9A4E218D06A5C392E1 /* CrossSourceMatcher.swift in Sources */,
 				B678B2E991AC18A1F747A9D2 /* MusicSDKProtocol.swift in Sources */,
 				2DF69D30C8D73D6AC4548DC3 /* FormatUtils.swift in Sources */,
 				4F56039C20D54D5FFA044736 /* HTTPClient.swift in Sources */,

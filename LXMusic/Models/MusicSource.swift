@@ -1,18 +1,26 @@
 import Foundation
 
-/// Online and local music sources (Kuwo only + local).
+/// Online and local music sources matching LX Music Desktop (`kw`, `kg`, `tx`, `wy`, `mg`, `local`).
 enum MusicSource: String, Codable, CaseIterable, Identifiable, Hashable, Sendable {
     case kw
+    case kg
+    case tx
+    case wy
+    case mg
     case local
 
     var id: String { rawValue }
 
-    /// Active online music sources.
-    static let onlineSources: [MusicSource] = [.kw]
+    /// Active online music sources (matches desktop `sources.sources` order).
+    static let onlineSources: [MusicSource] = [.kw, .kg, .tx, .wy, .mg]
 
     var displayName: String {
         switch self {
         case .kw: return "酷我音乐"
+        case .kg: return "酷狗音乐"
+        case .tx: return "QQ音乐"
+        case .wy: return "网易云音乐"
+        case .mg: return "咪咕音乐"
         case .local: return "本地音乐"
         }
     }
@@ -20,6 +28,10 @@ enum MusicSource: String, Codable, CaseIterable, Identifiable, Hashable, Sendabl
     var shortName: String {
         switch self {
         case .kw: return "酷我"
+        case .kg: return "酷狗"
+        case .tx: return "QQ"
+        case .wy: return "网易"
+        case .mg: return "咪咕"
         case .local: return "本地"
         }
     }

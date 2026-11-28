@@ -172,4 +172,302 @@ final class LXMusicCoreTests: XCTestCase {
         XCTAssertEqual(imported.playlists[2].name, "华语经典")
         XCTAssertEqual(imported.playlists[2].list.first?.id, "kw_12345")
     }
+
+    // MARK: - 7. Cross-Source Crypto, Matching & Multi-Platform Metadata
+
+    func testCrossSourceCryptoSignatures() throws {
+        // TX zzcSign: must handle index 40 safely without crashing and strip / + = \
+        let sign = CrossSourceMatcher.zzcSign(#"{"hello":"world"}"#)
+        XCTAssertTrue(sign.hasPrefix("zzc"))
+        XCTAssertEqual(sign, sign.lowercased())
+        XCTAssertFalse(sign.contains("/"))
+        XCTAssertFalse(sign.contains("+"))
+        XCTAssertFalse(sign.contains("="))
+        XCTAssertFalse(sign.contains("\\"))
+
+        // WY eapi: must encrypt with AES-128-ECB key `e82ckenh8dichen8` and decrypt back to expected plaintext
+        let url = "/api/search/song/list/page"
+        let jsonText = #"{"keyword":"七里香","limit":25}"#
+        let hexParams = try CrossSourceMatcher.wyEapiParams(url: url, jsonText: jsonText)
+        let cipherData = try XCTUnwrap(Data(hexString: hexParams))
+        let plainData = try CryptoUtils.aesDecrypt(data: cipherData, key: Data("e82ckenh8dichen8".utf8), isECB: true)
+        let plainStr = try XCTUnwrap(String(data: plainData, encoding: .utf8))
+        let expectedDigest = CryptoUtils.md5Hex("nobody\(url)use\(jsonText)md5forencrypt")
+        XCTAssertEqual(plainStr, "\(url)-36cd479b6b5-\(jsonText)-36cd479b6b5-\(expectedDigest)")
+
+        // MG signature
+        let mgSig = CrossSourceMatcher.mgSignature(time: "1700000000000", query: "周杰伦")
+        XCTAssertEqual(mgSig.deviceId, "963B7AA0D21511ED807EE5846EC87D20")
+        XCTAssertEqual(mgSig.sign.count, 32)
+    }
+
+    func testCrossSourceMatchAndRank() {
+        let target = MusicInfo(
+            id: "kw_100",
+            name: "七里香",
+            singer: "周杰伦",
+            source: .kw,
+            interval: "04:59",
+            meta: MusicMeta(songId: "100", albumName: "七里香")
+        )
+
+        let kgLive = MusicInfo(
+            id: "kg_live",
+            name: "七里香 (Live)",
+            singer: "周杰伦",
+            source: .kg,
+            interval: "04:59",
+            meta: MusicMeta(songId: "1", albumName: "演唱会", hash: "HASH_LIVE")
+        )
+        let kgWrongDuration = MusicInfo(
+            id: "kg_short",
+            name: "七里香",
+            singer: "周杰伦",
+            source: .kg,
+            interval: "03:00",
+            meta: MusicMeta(songId: "2", albumName: "七里香", hash: "HASH_SHORT")
+        )
+        let kgStudio = MusicInfo(
+            id: "kg_ok",
+            name: "七里香",
+            singer: "周杰伦",
+            source: .kg,
+            interval: "05:01",
+            meta: MusicMeta(songId: "3", albumName: "七里香", hash: "HASH_OK")
+        )
+        let txExact = MusicInfo(
+            id: "tx_exact",
+            name: "七里香",
+            singer: "周杰伦",
+            source: .tx,
+            interval: "04:59",
+            meta: MusicMeta(songId: "001TXMID", albumName: "七里香", strMediaMid: "001MEDIA")
+        )
+        let wyMatch = MusicInfo(
+            id: "wy_match",
+            name: "七里香",
+            singer: "周杰伦",
+            source: .wy,
+            interval: "04:58",
+            meta: MusicMeta(songId: "186016", albumName: "精选集")
+        )
+
+        let ranked = CrossSourceMatcher.matchAndRank(
+            target: target,
+            sourceLists: [[kgLive, kgWrongDuration, kgStudio], [txExact], [wyMatch]]
+        )
+
+        XCTAssertEqual(ranked.map(\.id), ["tx_exact", "kg_ok", "wy_match"])
+    }
+
+    func testLegacyDictionaryIncludesMultiPlatformMetadata() {
+        let kgTrack = MusicInfo(
+            id: "123_ABCD",
+            name: "TestKG",
+            singer: "Artist",
+            source: .kg,
+            meta: MusicMeta(
+                songId: "123",
+                qualitys: [MusicQualityItem(type: .k128, size: "3M", hash: "ABCD")],
+                hash: "ABCD",
+                albumAudioId: "999"
+            )
+        )
+        let kgLegacy = kgTrack.toLegacyDictionary()
+        XCTAssertEqual(kgLegacy["source"] as? String, "kg")
+        XCTAssertEqual(kgLegacy["hash"] as? String, "ABCD")
+        XCTAssertEqual(kgLegacy["albumAudioId"] as? String, "999")
+
+        let txTrack = MusicInfo(
+            id: "tx_001MID",
+            name: "TestTX",
+            singer: "Artist",
+            source: .tx,
+            meta: MusicMeta(songId: "001MID", strMediaMid: "001MEDIA", txSongId: "777", albumMid: "001ALB")
+        )
+        let txLegacy = txTrack.toLegacyDictionary()
+        XCTAssertEqual(txLegacy["songmid"] as? String, "001MID")
+        XCTAssertEqual(txLegacy["strMediaMid"] as? String, "001MEDIA")
+        XCTAssertEqual(txLegacy["songId"] as? String, "777")
+        XCTAssertEqual(txLegacy["albumMid"] as? String, "001ALB")
+
+        let mgTrack = MusicInfo(
+            id: "mg_555",
+            name: "TestMG",
+            singer: "Artist",
+            source: .mg,
+            meta: MusicMeta(songId: "555", copyrightId: "60054701934")
+        )
+        let mgLegacy = mgTrack.toLegacyDictionary()
+        XCTAssertEqual(mgLegacy["copyrightId"] as? String, "60054701934")
+    }
+
+    // MARK: - 8. Cross-Source Playback Fallback & Consecutive Failure Stop
+
+    @MainActor
+    func testPlayerControllerCrossSourceFallbackWhenKWFails() async throws {
+        PersistenceStore.shared.clearMusicUrlCache()
+        let settingsStore = SettingsStore()
+        let libraryStore = LibraryStore()
+        let dislikeStore = DislikeStore()
+        let userApiStore = UserApiStore(settingsStore: settingsStore)
+
+        let scriptCode = """
+        /**
+         * @name Fallback Test Source
+         * @version 1.0.0
+         */
+        const { EVENT_NAMES, on, send } = globalThis.lx;
+        on(EVENT_NAMES.request, ({ source, action, info }) => {
+          if (source === 'wy') {
+            return Promise.resolve('https://cdn.example.com/wy_' + info.musicInfo.songmid + '.mp3');
+          }
+          return Promise.reject(new Error(source + ' unavailable'));
+        });
+        send(EVENT_NAMES.inited, {
+          status: true,
+          sources: {
+            kw: { type: 'music', actions: ['musicUrl'], qualitys: ['128k', '320k'] },
+            kg: { type: 'music', actions: ['musicUrl'], qualitys: ['128k', '320k'] },
+            tx: { type: 'music', actions: ['musicUrl'], qualitys: ['128k', '320k'] },
+            wy: { type: 'music', actions: ['musicUrl'], qualitys: ['128k', '320k'] },
+            mg: { type: 'music', actions: ['musicUrl'], qualitys: ['128k', '320k'] }
+          }
+        });
+        """
+
+        let imported = try userApiStore.importScript(rawCode: scriptCode, autoActivate: true)
+        defer { userApiStore.delete(scriptId: imported.id) }
+
+        for _ in 0..<50 {
+            if userApiStore.runtimeStatus.isInitialized { break }
+            try await Task.sleep(nanoseconds: 50_000_000)
+        }
+        XCTAssertTrue(userApiStore.runtimeStatus.isInitialized)
+
+        let mockMatcher = CrossSourceMatcher { source, _, _ in
+            switch source {
+            case .kg:
+                return [MusicInfo(id: "kg_1", name: "稻香", singer: "周杰伦", source: .kg, interval: "03:43", meta: MusicMeta(songId: "kg1", qualitys: [MusicQualityItem(type: .k320)], hash: "H1"))]
+            case .wy:
+                return [MusicInfo(id: "wy_2", name: "稻香", singer: "周杰伦", source: .wy, interval: "03:43", meta: MusicMeta(songId: "wy2", qualitys: [MusicQualityItem(type: .k320)]))]
+            case .mg:
+                return [MusicInfo(id: "mg_3", name: "稻香", singer: "周杰伦", source: .mg, interval: "03:43", meta: MusicMeta(songId: "mg3", qualitys: [MusicQualityItem(type: .k320)], copyrightId: "C3"))]
+            case .tx:
+                return [MusicInfo(id: "tx_4", name: "稻香", singer: "周杰伦", source: .tx, interval: "03:43", meta: MusicMeta(songId: "tx4", qualitys: [MusicQualityItem(type: .k320)], strMediaMid: "M4"))]
+            default:
+                return []
+            }
+        }
+
+        let player = PlayerController(
+            settingsStore: settingsStore,
+            libraryStore: libraryStore,
+            dislikeStore: dislikeStore,
+            userApiStore: userApiStore,
+            crossSourceMatcher: mockMatcher,
+            autoSkipDelayNanoseconds: 20_000_000
+        )
+
+        let kwTrack = MusicInfo(
+            id: "kw_999",
+            name: "稻香",
+            singer: "周杰伦",
+            source: .kw,
+            interval: "03:43",
+            meta: MusicMeta(songId: "999", qualitys: [MusicQualityItem(type: .k320)])
+        )
+
+        let resolved = try await player.resolvePlayURL(for: kwTrack, isRefresh: true)
+        XCTAssertEqual(resolved.actualSource, .wy)
+        XCTAssertEqual(resolved.url, "https://cdn.example.com/wy_wy2.mp3")
+    }
+
+    @MainActor
+    func testPlayerControllerStopsAfterThreeConsecutiveFailures() async throws {
+        PersistenceStore.shared.clearMusicUrlCache()
+        let settingsStore = SettingsStore()
+        settingsStore.settings.autoSkipOnError = true
+        settingsStore.settings.playMode = .listLoop
+        let libraryStore = LibraryStore()
+        let dislikeStore = DislikeStore()
+        let userApiStore = UserApiStore(settingsStore: settingsStore)
+
+        let scriptCode = """
+        /**
+         * @name Always Fail Source
+         * @version 1.0.0
+         */
+        const { EVENT_NAMES, on, send } = globalThis.lx;
+        on(EVENT_NAMES.request, ({ source }) => {
+          return Promise.reject(new Error(source + ' failed'));
+        });
+        send(EVENT_NAMES.inited, {
+          status: true,
+          sources: {
+            kw: { type: 'music', actions: ['musicUrl'], qualitys: ['128k'] },
+            kg: { type: 'music', actions: ['musicUrl'], qualitys: ['128k'] },
+            tx: { type: 'music', actions: ['musicUrl'], qualitys: ['128k'] },
+            wy: { type: 'music', actions: ['musicUrl'], qualitys: ['128k'] },
+            mg: { type: 'music', actions: ['musicUrl'], qualitys: ['128k'] }
+          }
+        });
+        """
+
+        let imported = try userApiStore.importScript(rawCode: scriptCode, autoActivate: true)
+        defer { userApiStore.delete(scriptId: imported.id) }
+
+        for _ in 0..<50 {
+            if userApiStore.runtimeStatus.isInitialized { break }
+            try await Task.sleep(nanoseconds: 50_000_000)
+        }
+        XCTAssertTrue(userApiStore.runtimeStatus.isInitialized)
+
+        let mockMatcher = CrossSourceMatcher { source, query, _ in
+            let title = query.split(separator: " ").first.map(String.init) ?? query
+            return [MusicInfo(
+                id: "\(source.rawValue)_\(title)",
+                name: title,
+                singer: "Singer",
+                source: source,
+                interval: "03:00",
+                meta: MusicMeta(songId: "alt_\(source.rawValue)", qualitys: [MusicQualityItem(type: .k128)])
+            )]
+        }
+
+        let player = PlayerController(
+            settingsStore: settingsStore,
+            libraryStore: libraryStore,
+            dislikeStore: dislikeStore,
+            userApiStore: userApiStore,
+            crossSourceMatcher: mockMatcher,
+            autoSkipDelayNanoseconds: 50_000_000
+        )
+
+        let tracks = (1...5).map { idx in
+            MusicInfo(
+                id: "kw_fail_\(idx)",
+                name: "FailSong\(idx)",
+                singer: "Singer",
+                source: .kw,
+                interval: "03:00",
+                meta: MusicMeta(songId: "\(idx)", qualitys: [MusicQualityItem(type: .k128)])
+            )
+        }
+
+        player.playList(tracks: tracks, startIndex: 0, listId: BuiltInListID.temp)
+
+        for _ in 0..<100 {
+            if player.consecutiveFailureCount >= PlayerController.maxConsecutiveFailures { break }
+            try await Task.sleep(nanoseconds: 50_000_000)
+        }
+        // Wait an extra 200ms to confirm playback stays stopped and does NOT skip to track #4
+        try await Task.sleep(nanoseconds: 200_000_000)
+
+        XCTAssertEqual(player.consecutiveFailureCount, 3)
+        XCTAssertEqual(player.currentTrack?.id, "kw_fail_3")
+        XCTAssertFalse(player.isPlaying)
+        XCTAssertFalse(player.isLoading)
+        XCTAssertEqual(player.errorMessage, "连续 3 首歌曲播放失败，已停止播放")
+    }
 }

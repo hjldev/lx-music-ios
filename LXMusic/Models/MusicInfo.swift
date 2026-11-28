@@ -52,6 +52,21 @@ struct MusicMeta: Codable, Hashable, Sendable {
     var qualitys: [MusicQualityItem]
     var _qualitys: [String: MusicQualityMeta]
 
+    // KG specific
+    var hash: String?
+    var albumAudioId: String?
+
+    // TX specific
+    var strMediaMid: String?
+    var txSongId: String?
+    var albumMid: String?
+
+    // MG specific
+    var copyrightId: String?
+    var lrcUrl: String?
+    var mrcUrl: String?
+    var trcUrl: String?
+
     // Local specific
     var filePath: String?
     var ext: String?
@@ -63,6 +78,15 @@ struct MusicMeta: Codable, Hashable, Sendable {
         albumId: String? = nil,
         qualitys: [MusicQualityItem] = [],
         _qualitys: [String: MusicQualityMeta]? = nil,
+        hash: String? = nil,
+        albumAudioId: String? = nil,
+        strMediaMid: String? = nil,
+        txSongId: String? = nil,
+        albumMid: String? = nil,
+        copyrightId: String? = nil,
+        lrcUrl: String? = nil,
+        mrcUrl: String? = nil,
+        trcUrl: String? = nil,
         filePath: String? = nil,
         ext: String? = nil
     ) {
@@ -80,12 +104,24 @@ struct MusicMeta: Codable, Hashable, Sendable {
             }
             self._qualitys = dict
         }
+        self.hash = hash
+        self.albumAudioId = albumAudioId
+        self.strMediaMid = strMediaMid
+        self.txSongId = txSongId
+        self.albumMid = albumMid
+        self.copyrightId = copyrightId
+        self.lrcUrl = lrcUrl
+        self.mrcUrl = mrcUrl
+        self.trcUrl = trcUrl
         self.filePath = filePath
         self.ext = ext
     }
 
     enum CodingKeys: String, CodingKey {
         case songId, albumName, picUrl, albumId, qualitys, _qualitys
+        case hash, albumAudioId
+        case strMediaMid, txSongId = "id", albumMid
+        case copyrightId, lrcUrl, mrcUrl, trcUrl
         case filePath, ext
     }
 
@@ -112,6 +148,15 @@ struct MusicMeta: Codable, Hashable, Sendable {
             self._qualitys = dict
         }
 
+        self.hash = c.decodeFlexibleString(forKey: .hash)
+        self.albumAudioId = c.decodeFlexibleString(forKey: .albumAudioId)
+        self.strMediaMid = c.decodeFlexibleString(forKey: .strMediaMid)
+        self.txSongId = c.decodeFlexibleString(forKey: .txSongId)
+        self.albumMid = c.decodeFlexibleString(forKey: .albumMid)
+        self.copyrightId = c.decodeFlexibleString(forKey: .copyrightId)
+        self.lrcUrl = try? c.decodeIfPresent(String.self, forKey: .lrcUrl)
+        self.mrcUrl = try? c.decodeIfPresent(String.self, forKey: .mrcUrl)
+        self.trcUrl = try? c.decodeIfPresent(String.self, forKey: .trcUrl)
         self.filePath = try? c.decodeIfPresent(String.self, forKey: .filePath)
         self.ext = try? c.decodeIfPresent(String.self, forKey: .ext)
     }
@@ -124,6 +169,15 @@ struct MusicMeta: Codable, Hashable, Sendable {
         try c.encodeIfPresent(albumId, forKey: .albumId)
         try c.encode(qualitys, forKey: .qualitys)
         try c.encode(_qualitys, forKey: ._qualitys)
+        try c.encodeIfPresent(hash, forKey: .hash)
+        try c.encodeIfPresent(albumAudioId, forKey: .albumAudioId)
+        try c.encodeIfPresent(strMediaMid, forKey: .strMediaMid)
+        try c.encodeIfPresent(txSongId, forKey: .txSongId)
+        try c.encodeIfPresent(albumMid, forKey: .albumMid)
+        try c.encodeIfPresent(copyrightId, forKey: .copyrightId)
+        try c.encodeIfPresent(lrcUrl, forKey: .lrcUrl)
+        try c.encodeIfPresent(mrcUrl, forKey: .mrcUrl)
+        try c.encodeIfPresent(trcUrl, forKey: .trcUrl)
         try c.encodeIfPresent(filePath, forKey: .filePath)
         try c.encodeIfPresent(ext, forKey: .ext)
     }
@@ -180,7 +234,7 @@ struct MusicInfo: Codable, Identifiable, Hashable, Sendable {
             _types[item.type.rawValue] = mapObj
         }
 
-        return [
+        var dict: [String: Any] = [
             "name": name,
             "singer": singer,
             "source": source.rawValue,
@@ -188,12 +242,39 @@ struct MusicInfo: Codable, Identifiable, Hashable, Sendable {
             "albumName": meta.albumName,
             "albumId": meta.albumId ?? "",
             "interval": interval ?? "",
-            "img": meta.picUrl ?? NSNull(),
+            "img": meta.picUrl ?? "",
             "lrc": NSNull(),
             "types": types,
             "_types": _types,
             "typeUrl": [String: Any](),
         ]
+
+        // Source-specific fields matching `src/common/utils/tools.ts:toOldMusicInfo`
+        switch source {
+        case .kg:
+            dict["hash"] = meta.hash ?? ""
+            if let albumAudioId = meta.albumAudioId {
+                dict["albumAudioId"] = albumAudioId
+            }
+        case .tx:
+            dict["strMediaMid"] = meta.strMediaMid ?? ""
+            dict["albumMid"] = meta.albumMid ?? ""
+            if let txSongId = meta.txSongId {
+                dict["songId"] = txSongId
+            }
+        case .mg:
+            dict["copyrightId"] = meta.copyrightId ?? ""
+            if let lrcUrl = meta.lrcUrl { dict["lrcUrl"] = lrcUrl }
+            if let mrcUrl = meta.mrcUrl { dict["mrcUrl"] = mrcUrl }
+            if let trcUrl = meta.trcUrl { dict["trcUrl"] = trcUrl }
+        case .local:
+            dict["filePath"] = meta.filePath ?? ""
+            dict["ext"] = meta.ext ?? ""
+        case .kw, .wy:
+            break
+        }
+
+        return dict
     }
 
     /// Builds a v2 `MusicInfo` from a legacy v1 JSON dictionary (used when importing v1 `.lxmc` backups).
@@ -234,14 +315,33 @@ struct MusicInfo: Codable, Identifiable, Hashable, Sendable {
             }
         }
 
-        let id = "\(source.rawValue)_\(songmid)"
+        let hash = dict["hash"] as? String
+        let albumAudioId = (dict["albumAudioId"] as? String) ?? (dict["albumAudioId"] as? Int64).map(String.init) ?? (dict["albumAudioId"] as? Int).map(String.init)
+        let strMediaMid = dict["strMediaMid"] as? String
+        let txSongId = (dict["songId"] as? String) ?? (dict["songId"] as? Int64).map(String.init) ?? (dict["songId"] as? Int).map(String.init)
+        let albumMid = dict["albumMid"] as? String
+        let copyrightId = (dict["copyrightId"] as? String) ?? (dict["copyrightId"] as? Int64).map(String.init)
+        let lrcUrl = dict["lrcUrl"] as? String
+        let mrcUrl = dict["mrcUrl"] as? String
+        let trcUrl = dict["trcUrl"] as? String
+
+        let id = (source == .kg && hash != nil) ? "\(songmid)_\(hash!)" : "\(source.rawValue)_\(songmid)"
         let meta = MusicMeta(
             songId: songmid,
             albumName: albumName,
             picUrl: img,
             albumId: albumId,
             qualitys: qualitys,
-            _qualitys: _qualitys
+            _qualitys: _qualitys,
+            hash: hash,
+            albumAudioId: albumAudioId,
+            strMediaMid: strMediaMid,
+            txSongId: txSongId,
+            albumMid: albumMid,
+            copyrightId: copyrightId,
+            lrcUrl: lrcUrl,
+            mrcUrl: mrcUrl,
+            trcUrl: trcUrl
         )
 
         return MusicInfo(
